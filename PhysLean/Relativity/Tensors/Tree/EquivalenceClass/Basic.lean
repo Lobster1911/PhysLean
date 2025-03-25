@@ -5,6 +5,7 @@ Authors: Joseph Tooby-Smith
 -/
 import PhysLean.Relativity.Tensors.Tree.Basic
 import PhysLean.Relativity.Tensors.Tree.NodeIdentities.Basic
+import PhysLean.Relativity.Tensors.Tree.NodeIdentities.PermProd
 /-!
 
 ## Equivalence class on Tensor Trees
@@ -283,6 +284,113 @@ lemma tensorQuot_surjective {n} {c : Fin n → S.C} : Function.Surjective (tenso
   use ι (tensorNode t)
   rw [← tensor_eq_tensorQuot_apply]
   simp
+
+/-!
+
+## Prod quotent
+
+-/
+
+def prodQuot {n} {c : Fin n → S.C} {c1 : Fin n → S.C} :
+    S.TensorTreeQuot c → S.TensorTreeQuot c1 →
+      S.TensorTreeQuot (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm) := by
+  refine Quot.lift₂ (fun t1 t2 => ι (prod t1 t2)) ?_ ?_
+  · intro t1 t2 t3 h1
+    simp only [tensorRel] at h1
+    simp only
+    rw [ι_apply_eq_iff_tensor_apply_eq]
+    rw [prod_tensor, prod_tensor, h1]
+  · intro t1 t2 t3 h1
+    simp only [tensorRel] at h1
+    simp only
+    rw [ι_apply_eq_iff_tensor_apply_eq]
+    rw [prod_tensor, prod_tensor, h1]
+
+@[simp]
+lemma ι_prod_eq_prodQuot {n} {c : Fin n → S.C} {c1 : Fin n → S.C} (t1 : TensorTree S c)
+    (t2 : TensorTree S c1) :
+    ι (prod t1 t2) = prodQuot (ι t1) (ι t2) := rfl
+
+/-!
+
+## Contr quotent
+
+-/
+
+TODO "Lift contrQuot to a linear  map. "
+
+def contrQuot {n} {c : Fin (n + 1 + 1) → S.C} (i : Fin (n + 1 + 1))
+    (j : Fin (n + 1))  (h : c (i.succAbove j) = S.τ (c i)) :
+    S.TensorTreeQuot c → S.TensorTreeQuot (c ∘ i.succAbove ∘ j.succAbove) := by
+  refine Quot.lift (fun t => ι (contr i j h t)) ?_
+  · intro t1 t2 h
+    rw [ι_apply_eq_iff_tensor_apply_eq]
+    simp [contr_tensor]
+    simp [tensorRel] at h
+    rw [h]
+
+@[simp]
+lemma ι_contr_eq_contrQuot {n} {c : Fin (n + 1 + 1) → S.C} (i : Fin (n + 1 + 1))
+    (j : Fin (n + 1))  (h : c (i.succAbove j) = S.τ (c i)) (t : TensorTree S c) :
+    ι (contr i j h t) = contrQuot i j h (ι t) := rfl
+
+
+/-!
+
+## Perm quotent
+
+-/
+
+TODO "Lift permQuot to a linear  map. "
+
+def permQuot {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
+      (σ : (OverColor.mk c) ⟶ (OverColor.mk c1)) :
+      S.TensorTreeQuot c → S.TensorTreeQuot c1 := by
+  refine Quot.lift (fun t => ι (perm σ t)) ?_
+  · intro t1 t2 h
+    rw [ι_apply_eq_iff_tensor_apply_eq]
+    simp [perm_tensor]
+    simp [tensorRel] at h
+    rw [h]
+
+@[simp]
+lemma ι_perm_eq_permQuot {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
+      (σ : (OverColor.mk c) ⟶ (OverColor.mk c1)) (t : TensorTree S c) :
+    ι (perm σ t) = permQuot σ (ι t) := rfl
+
+
+/-!
+
+## Relations
+
+-/
+
+@[simp]
+lemma prodQuot_permQuot_left (t : S.TensorTreeQuot c) (t2 : S.TensorTreeQuot c2) :
+    (prodQuot (permQuot σ t) t2) = (permQuot (TensorTree.permProdLeft c2 σ) (prodQuot t t2)) := by
+  obtain ⟨t, rfl⟩ := ι_surjective t
+  obtain ⟨t2, rfl⟩ := ι_surjective t2
+  rw [← ι_prod_eq_prodQuot, ← ι_perm_eq_permQuot, ← ι_perm_eq_permQuot, ← ι_prod_eq_prodQuot]
+  rw [ι_apply_eq_iff_tensor_apply_eq]
+  rw [prod_perm_left]
+
+@[simp]
+lemma prodQuot_permQuot_right (t2 : S.TensorTreeQuot c2) (t : S.TensorTreeQuot c) :
+    (prodQuot t2 (permQuot σ t)) = (permQuot (TensorTree.permProdRight c2 σ) (prodQuot t2 t)) := by
+  obtain ⟨t, rfl⟩ := ι_surjective t
+  obtain ⟨t2, rfl⟩ := ι_surjective t2
+  rw [← ι_prod_eq_prodQuot, ← ι_perm_eq_permQuot, ← ι_perm_eq_permQuot, ← ι_prod_eq_prodQuot]
+  rw [ι_apply_eq_iff_tensor_apply_eq]
+  rw [prod_perm_right]
+
+@[simp]
+lemma permQuot_permQuot {n n1 n2 : ℕ} {c : Fin n → S.C} {c1 : Fin n1 → S.C} {c2 : Fin n2 → S.C}
+    (σ : (OverColor.mk c) ⟶ (OverColor.mk c1)) (σ2 : (OverColor.mk c1) ⟶ (OverColor.mk c2))
+    (t : S.TensorTreeQuot c) : (permQuot σ2 (permQuot σ t)) = (permQuot (σ ≫ σ2) t) := by
+  obtain ⟨t, rfl⟩ := ι_surjective t
+  rw [← ι_perm_eq_permQuot, ← ι_perm_eq_permQuot, ← ι_perm_eq_permQuot]
+  rw [ι_apply_eq_iff_tensor_apply_eq]
+  rw [perm_perm]
 
 end TensorTreeQuot
 
