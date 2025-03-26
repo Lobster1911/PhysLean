@@ -26,10 +26,6 @@ namespace Tensor
 variable  {S : TensorSpecies k} {n n' n2 : ℕ} {c : Fin n → S.C} {c' : Fin n' → S.C}
   {c2 : Fin n2 → S.C}
 
-/-- The type of tensors specified by a map to colors `c : OverColor S.C`. -/
-abbrev Pure (S : TensorSpecies k) (c : Fin n → S.C) : Type :=
-    (i : Fin n) → S.FD.obj (Discrete.mk (c i))
-
 abbrev ComponentIdx {n : ℕ} (c : Fin n → S.C) : Type := Π j, Fin (S.repDim (c j))
 
 lemma ComponentIdx.congr_right {n : ℕ} {c : Fin n → S.C} (b : ComponentIdx c)
@@ -37,7 +33,23 @@ lemma ComponentIdx.congr_right {n : ℕ} {c : Fin n → S.C} (b : ComponentIdx c
   subst h
   rfl
 
+/-!
+
+## Pure tensors
+
+-/
+
+/-- The type of tensors specified by a map to colors `c : OverColor S.C`. -/
+abbrev Pure (S : TensorSpecies k) (c : Fin n → S.C) : Type :=
+    (i : Fin n) → S.FD.obj (Discrete.mk (c i))
+
 namespace Pure
+
+@[simp]
+lemma congr_right {n : ℕ} {c : Fin n → S.C} (p : Pure S c)
+    (i j : Fin n) (h : i = j) : S.FD.map (eqToHom (by rw [h])) (p j) =p i  := by
+  subst h
+  simp
 
 noncomputable def toTensor {n : ℕ} {c : Fin n → S.C} (p : Pure S c) : S.Tensor c :=
   PiTensorProduct.tprod k p
@@ -57,6 +69,12 @@ lemma update_same {n : ℕ} {c : Fin n → S.C} [inst : DecidableEq (Fin n)]  (p
 lemma toTensor_update_add {n : ℕ} {c : Fin n → S.C} [inst : DecidableEq (Fin n)] (p : Pure S c)
     (i : Fin n) (x y : S.FD.obj (Discrete.mk (c i))) :
     (update p i (x + y)).toTensor = (update p i x).toTensor + (update p i y).toTensor := by
+  simp [toTensor, update]
+
+@[simp]
+lemma toTensor_update_smul {n : ℕ} {c : Fin n → S.C} [inst : DecidableEq (Fin n)] (p : Pure S c)
+    (i : Fin n) (r : k) (y : S.FD.obj (Discrete.mk (c i))) :
+    (update p i (r • y)).toTensor = r • (update p i y).toTensor := by
   simp [toTensor, update]
 
 def drop {n : ℕ} {c : Fin (n + 1) → S.C} (p : Pure S c) (i : Fin (n + 1)) :
@@ -79,7 +97,7 @@ lemma update_succAbove_drop {n : ℕ} {c : Fin (n + 1) → S.C} [inst : Decidabl
       exact h
 
 @[simp]
-lemma uptdate_drop_self {n : ℕ} {c : Fin (n + 1) → S.C} [inst : DecidableEq (Fin (n + 1))]
+lemma update_drop_self {n : ℕ} {c : Fin (n + 1) → S.C} [inst : DecidableEq (Fin (n + 1))]
     (p : Pure S c) (i : Fin (n + 1)) (x : S.FD.obj (Discrete.mk (c i))) :
     (update p i x).drop i = p.drop i := by
   ext k
@@ -149,7 +167,7 @@ lemma component_update_smul {n : ℕ} [inst : DecidableEq (Fin n)]
   · exact Fin.elim0 i
   rename_i n
   rw [component_eq_drop _ i, component_eq_drop _ i]
-  simp only [update_same, map_smul, Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul, uptdate_drop_self]
+  simp only [update_same, map_smul, Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul, update_drop_self]
   ring
 
 noncomputable def componentMap {n : ℕ} (c : Fin n → S.C) :
@@ -306,7 +324,34 @@ end Basis
 ## The action
 -/
 
-noncomputable instance mulAction : MulAction S.G (S.Tensor c) where
+namespace Pure
+
+noncomputable instance actionP : MulAction S.G (Pure S c) where
+  smul g p := fun i => (S.FD.obj _).ρ g (p i)
+  one_smul p := by
+    ext i
+    change (S.FD.obj _).ρ 1 (p i) = p i
+    simp
+  mul_smul g g' p := by
+    ext i
+    change (S.FD.obj _).ρ (g * g') (p i) = (S.FD.obj _).ρ g ((S.FD.obj _).ρ g' (p i))
+    simp
+
+noncomputable instance : SMul (S.G) (Pure S c) := actionP.toSMul
+
+lemma actionP_eq {g : S.G} {p : Pure S c} : g • p = fun i => (S.FD.obj _).ρ g (p i) := rfl
+
+@[simp]
+lemma drop_actionP  {n : ℕ} {c : Fin (n + 1) → S.C} {i : Fin (n + 1)} {p : Pure S c} (g : S.G) :
+    (g • p).drop i = g • (p.drop i) := by
+  ext j
+  rw [drop, actionP_eq, actionP_eq]
+  simp only [Function.comp_apply]
+  rfl
+
+end Pure
+
+noncomputable instance actionT : MulAction S.G (S.Tensor c) where
   smul g t := (S.F.obj (OverColor.mk c)).ρ g t
   one_smul t := by
     change (S.F.obj (OverColor.mk c)).ρ 1 t = t
@@ -316,7 +361,31 @@ noncomputable instance mulAction : MulAction S.G (S.Tensor c) where
       (S.F.obj (OverColor.mk c)).ρ g ((S.F.obj (OverColor.mk c)).ρ g' t)
     simp
 
-lemma mulAction_eq {g : S.G} {t : S.Tensor c} : g • t = (S.F.obj (OverColor.mk c)).ρ g t := rfl
+lemma actionT_eq {g : S.G} {t : S.Tensor c} : g • t = (S.F.obj (OverColor.mk c)).ρ g t := rfl
+
+lemma actionT_toTensor {g : S.G} {p : Pure S c} :
+    g • p.toTensor = Pure.toTensor (g • p) := by
+  rw [actionT_eq, Pure.toTensor]
+  simp [F_def, lift, lift.obj']
+  rw [OverColor.lift.objObj'_ρ_tprod]
+  rfl
+
+@[simp]
+lemma actionT_add {g : S.G} {t1 t2 : S.Tensor c} :
+    g • (t1 + t2) = g • t1 + g • t2 := by
+  rw [actionT_eq, actionT_eq, actionT_eq]
+  simp
+
+@[simp]
+lemma actionT_smul {g : S.G} {r : k} {t : S.Tensor c} :
+    g • (r • t) = r • (g • t) := by
+  rw [actionT_eq, actionT_eq]
+  simp
+
+@[simp]
+lemma actionT_zero {g : S.G} : g • (0 : S.Tensor c) = 0 := by
+  simp [actionT_eq]
+
 /-!
 
 ## Permutations
@@ -410,7 +479,7 @@ lemma permT_pure {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
 lemma permT_equivariant {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
       {σ : Fin m → Fin n} (h : PermCond c c1 σ) (g : S.G) (t : S.Tensor c) :
       permT σ h (g • t) = g • permT σ h t := by
-  simp [permT, mulAction_eq]
+  simp [permT, actionT_eq]
   exact Rep.hom_comm_apply (S.F.map h.toHom) g t
 
 @[simp]
@@ -621,7 +690,6 @@ lemma PermCond.prod_right {σ : Fin n' → Fin n} (c2 : Fin n2 → S.C) (h : Per
     match i with
     | Sum.inl i => rfl
     | Sum.inr i => simp [h.2]
-
 
 end Tensor
 
