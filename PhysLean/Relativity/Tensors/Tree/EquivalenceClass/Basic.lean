@@ -108,7 +108,7 @@ def smulQuot {n} {c : Fin n → S.C} (r : k) :
 lemma ι_smul_eq_smulQuot {n} {c : Fin n → S.C} (r : k) (t : TensorTree S c) :
     ι (smul r t) = smulQuot r (ι t) := rfl
 
-noncomputable instance {n} (c : Fin n → S.C) : AddCommMonoid (S.TensorTreeQuot c) where
+noncomputable instance commMonoid {n} (c : Fin n → S.C) : AddCommMonoid (S.TensorTreeQuot c) where
   add := addQuot
   zero := ι zeroTree
   nsmul := fun n t => smulQuot (n : k) t
@@ -156,6 +156,35 @@ noncomputable instance {n} (c : Fin n → S.C) : AddCommMonoid (S.TensorTreeQuot
     simp only [smul_tensor, add_tensor]
     rw [add_smul]
     simp
+
+noncomputable instance {n} (c : Fin n → S.C) : AddCommGroup (S.TensorTreeQuot c) :=
+  {commMonoid c with
+  neg t := smulQuot ((-1 : k)) t,
+  zsmul n t := smulQuot n t,
+  neg_add_cancel t := by
+    change addQuot (smulQuot ((-1 : k)) t) t = ι zeroTree
+    obtain ⟨t, rfl⟩ := ι_surjective t
+    simp [← ι_smul_eq_smulQuot,  ← ι_add_eq_addQuot, ι_apply_eq_iff_tensor_apply_eq,
+      smul_tensor, add_tensor]
+  zsmul_zero' t := by
+    simp
+    change smulQuot 0 t = ι zeroTree
+    obtain ⟨t, rfl⟩ := ι_surjective t
+    simp [← ι_smul_eq_smulQuot, ι_apply_eq_iff_tensor_apply_eq, smul_tensor, _root_.zero_smul,
+      zeroTree_tensor]
+  zsmul_succ' n t := by
+    simp
+    change smulQuot ((n : k) + 1) t = addQuot (smulQuot (n : k) t) t
+    obtain ⟨t, rfl⟩ := ι_surjective t
+    simp [← ι_smul_eq_smulQuot,  ← ι_add_eq_addQuot, ι_apply_eq_iff_tensor_apply_eq,
+      smul_tensor, add_tensor, add_smul]
+  zsmul_neg' n t := by
+    simp
+    obtain ⟨t, rfl⟩ := ι_surjective t
+    simp [← ι_smul_eq_smulQuot,  ← ι_add_eq_addQuot, ι_apply_eq_iff_tensor_apply_eq,
+      smul_tensor, add_tensor, add_smul]
+    abel
+  }
 
 instance {n} {c : Fin n → S.C} : Module k (S.TensorTreeQuot c) where
   smul r t := smulQuot r t
@@ -209,6 +238,20 @@ lemma smul_eq_smulQuot {n} {c : Fin n → S.C} (r : k) (t : S.TensorTreeQuot c) 
 @[simp]
 lemma ι_smul_eq_smul {n} {c : Fin n → S.C} (r : k) (t : TensorTree S c) :
     ι (smul r t) = r • (ι t) := rfl
+
+/-!
+
+## Negation
+
+-/
+
+@[simp]
+lemma ι_neg {n} {c : Fin n → S.C} (t : TensorTree S c) :
+    ι (neg t) = - (ι t) := by
+  change _ =  ((-1 : k)) • (ι t)
+  rw [← ι_smul_eq_smul]
+  rw [ι_apply_eq_iff_tensor_apply_eq]
+  simp [neg_tensor, smul_tensor]
 
 /-!
 
@@ -291,23 +334,53 @@ lemma tensorQuot_surjective {n} {c : Fin n → S.C} : Function.Surjective (tenso
 
 -/
 
-def prodQuot {n} {c : Fin n → S.C} {c1 : Fin n → S.C} :
-    S.TensorTreeQuot c → S.TensorTreeQuot c1 →
+def prodQuot {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C} :
+    S.TensorTreeQuot c →ₗ[k] S.TensorTreeQuot c1 →ₗ[k]
       S.TensorTreeQuot (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm) := by
-  refine Quot.lift₂ (fun t1 t2 => ι (prod t1 t2)) ?_ ?_
-  · intro t1 t2 t3 h1
-    simp only [tensorRel] at h1
-    simp only
+  refine LinearMap.mk₂ k ?_ ?_ ?_ ?_ ?_
+  · refine Quot.lift₂ (fun t1 t2 => ι (prod t1 t2)) ?_ ?_
+    · intro t1 t2 t3 h1
+      simp only [tensorRel] at h1
+      simp only
+      rw [ι_apply_eq_iff_tensor_apply_eq]
+      rw [prod_tensor, prod_tensor, h1]
+    · intro t1 t2 t3 h1
+      simp only [tensorRel] at h1
+      simp only
+      rw [ι_apply_eq_iff_tensor_apply_eq]
+      rw [prod_tensor, prod_tensor, h1]
+  · intro t1 t2 t3
+    obtain ⟨t1, rfl⟩ := ι_surjective t1
+    obtain ⟨t2, rfl⟩ := ι_surjective t2
+    obtain ⟨t3, rfl⟩ := ι_surjective t3
+    change ι (prod (add t1 t2) t3) =  ι (add (prod t1 t3) (prod t2 t3))
     rw [ι_apply_eq_iff_tensor_apply_eq]
-    rw [prod_tensor, prod_tensor, h1]
-  · intro t1 t2 t3 h1
-    simp only [tensorRel] at h1
-    simp only
+    rw [add_prod]
+  · intro n t1 t2
+    obtain ⟨t1, rfl⟩ := ι_surjective t1
+    obtain ⟨t2, rfl⟩ := ι_surjective t2
+    change ι (prod (smul n t1) t2) =  ι (smul n (prod t1 t2))
     rw [ι_apply_eq_iff_tensor_apply_eq]
-    rw [prod_tensor, prod_tensor, h1]
+    rw [smul_prod]
+  · intro t1 t2 t3
+    obtain ⟨t1, rfl⟩ := ι_surjective t1
+    obtain ⟨t2, rfl⟩ := ι_surjective t2
+    obtain ⟨t3, rfl⟩ := ι_surjective t3
+    change ι (prod t1 (add t2 t3)) =  ι (add (prod t1 t2) (prod t1 t3))
+    rw [ι_apply_eq_iff_tensor_apply_eq]
+    rw [prod_add]
+  · intro n t1 t2
+    obtain ⟨t1, rfl⟩ := ι_surjective t1
+    obtain ⟨t2, rfl⟩ := ι_surjective t2
+    change ι (prod t1 (smul n t2)) =  ι (smul n (prod t1 t2))
+    rw [ι_apply_eq_iff_tensor_apply_eq]
+    rw [prod_smul]
+
+
+
 
 @[simp]
-lemma ι_prod_eq_prodQuot {n} {c : Fin n → S.C} {c1 : Fin n → S.C} (t1 : TensorTree S c)
+lemma ι_prod_eq_prodQuot {n n2} {c : Fin n → S.C} {c1 : Fin n2 → S.C} (t1 : TensorTree S c)
     (t2 : TensorTree S c1) :
     ι (prod t1 t2) = prodQuot (ι t1) (ι t2) := rfl
 
@@ -321,13 +394,25 @@ TODO "Lift contrQuot to a linear  map. "
 
 def contrQuot {n} {c : Fin (n + 1 + 1) → S.C} (i : Fin (n + 1 + 1))
     (j : Fin (n + 1))  (h : c (i.succAbove j) = S.τ (c i)) :
-    S.TensorTreeQuot c → S.TensorTreeQuot (c ∘ i.succAbove ∘ j.succAbove) := by
-  refine Quot.lift (fun t => ι (contr i j h t)) ?_
-  · intro t1 t2 h
+    S.TensorTreeQuot c →ₗ[k] S.TensorTreeQuot (c ∘ i.succAbove ∘ j.succAbove) where
+  toFun := by
+    refine Quot.lift (fun t => ι (contr i j h t)) ?_
+    · intro t1 t2 h
+      rw [ι_apply_eq_iff_tensor_apply_eq]
+      simp [contr_tensor]
+      simp [tensorRel] at h
+      rw [h]
+  map_add' t1 t2 := by
+    obtain ⟨t1, rfl⟩ := ι_surjective t1
+    obtain ⟨t2, rfl⟩ := ι_surjective t2
+    change ι (contr i j h (t1.add t2)) = ι (add (contr i j h t1)  (contr i j h t2))
     rw [ι_apply_eq_iff_tensor_apply_eq]
-    simp [contr_tensor]
-    simp [tensorRel] at h
-    rw [h]
+    simp [contr_tensor, add_tensor]
+  map_smul' r t := by
+    obtain ⟨t, rfl⟩ := ι_surjective t
+    change ι (contr i j h (smul r t)) = smulQuot r (ι (contr i j h t))
+    rw [← ι_smul_eq_smulQuot, ι_apply_eq_iff_tensor_apply_eq]
+    simp [contr_tensor, smul_tensor]
 
 @[simp]
 lemma ι_contr_eq_contrQuot {n} {c : Fin (n + 1 + 1) → S.C} (i : Fin (n + 1 + 1))
@@ -343,55 +428,191 @@ lemma ι_contr_eq_contrQuot {n} {c : Fin (n + 1 + 1) → S.C} (i : Fin (n + 1 + 
 
 TODO "Lift permQuot to a linear  map. "
 
+def PermQuotCond {n m : ℕ} (c : Fin n → S.C) (c1 : Fin m → S.C)
+      (σ : Fin n → Fin m) : Prop :=
+    Function.Bijective σ ∧ ∀ i, c i = c1 (σ i)
+
+def PermQuotCond.inv {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
+      {σ : Fin n → Fin m} (h : PermQuotCond c c1 σ) : Fin m → Fin n :=
+  Fintype.bijInv h.1
+
+def PermQuotCond.toEquiv {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
+      {σ : Fin n → Fin m} (h : PermQuotCond c c1 σ) :
+      Fin n ≃ Fin m where
+  toFun := σ
+  invFun := PermQuotCond.inv h
+  left_inv := Fintype.leftInverse_bijInv h.1
+  right_inv := Fintype.rightInverse_bijInv h.1
+
+lemma PermQuotCond.preserve_color {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
+      {σ : Fin n → Fin m} (h : PermQuotCond c c1 σ) :
+      ∀ (x : Fin m), c1 x = (c ∘ ⇑h.toEquiv.symm) x := by
+  intro x
+  obtain ⟨y, rfl⟩ := h.toEquiv.surjective x
+  simp only [Function.comp_apply, Equiv.symm_apply_apply]
+  rw [h.2]
+  rfl
+
+def PermQuotCond.toHom {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
+      {σ : Fin n → Fin m} (h : PermQuotCond c c1 σ) :
+      OverColor.mk c ⟶ OverColor.mk c1 :=
+    equivToHomEq (h.toEquiv) (h.preserve_color)
+
+lemma PermQuotCond.ofHom {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
+      (σ  : OverColor.mk c ⟶ OverColor.mk c1) :
+      PermQuotCond c c1 (Hom.toEquiv σ) := by
+  apply And.intro
+  · exact Equiv.bijective (Hom.toEquiv σ)
+  · intro x
+    simpa [OverColor.mk_hom] using Hom.toEquiv_comp_apply σ x
+
+lemma PermQuotCond.comp {n n1 n2 : ℕ} {c : Fin n → S.C} {c1 : Fin n1 → S.C}
+      {c2 : Fin n2 → S.C} {σ : Fin n → Fin n1} {σ2 : Fin n1 → Fin n2}
+      (h : PermQuotCond c c1 σ) (h2 : PermQuotCond c1 c2 σ2) :
+      PermQuotCond c c2 (σ2 ∘ σ) := by
+  apply And.intro
+  · refine Function.Bijective.comp h2.1 h.1
+  · intro x
+    simp only [Function.comp_apply]
+    rw [h.2, h2.2]
+
 def permQuot {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
-      (σ : (OverColor.mk c) ⟶ (OverColor.mk c1)) :
-      S.TensorTreeQuot c → S.TensorTreeQuot c1 := by
-  refine Quot.lift (fun t => ι (perm σ t)) ?_
-  · intro t1 t2 h
+      (σ : Fin n → Fin m) (h : PermQuotCond c c1 σ) :
+      S.TensorTreeQuot c →ₗ[k] S.TensorTreeQuot c1 where
+  toFun := by
+    refine Quot.lift (fun t => ι (perm h.toHom t)) ?_
+    · intro t1 t2 h
+      rw [ι_apply_eq_iff_tensor_apply_eq]
+      simp [perm_tensor]
+      simp [tensorRel] at h
+      rw [h]
+  map_add' t1 t2 := by
+    obtain ⟨t1, rfl⟩ := ι_surjective t1
+    obtain ⟨t2, rfl⟩ := ι_surjective t2
+    change ι (perm h.toHom (t1.add t2)) = ι (add ((perm h.toHom t1))  ((perm h.toHom t2)))
     rw [ι_apply_eq_iff_tensor_apply_eq]
-    simp [perm_tensor]
-    simp [tensorRel] at h
-    rw [h]
+    simp [perm_tensor, add_tensor]
+  map_smul' r t := by
+    obtain ⟨t, rfl⟩ := ι_surjective t
+    change ι (perm h.toHom (smul r t)) = smulQuot r (ι (perm h.toHom t))
+    rw [← ι_smul_eq_smulQuot, ι_apply_eq_iff_tensor_apply_eq]
+    simp [perm_tensor, smul_tensor]
 
 @[simp]
 lemma ι_perm_eq_permQuot {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
       (σ : (OverColor.mk c) ⟶ (OverColor.mk c1)) (t : TensorTree S c) :
-    ι (perm σ t) = permQuot σ (ι t) := rfl
+      ι (perm σ t) = permQuot (Hom.toEquiv σ) (PermQuotCond.ofHom σ) (ι t) := by
+  trans ι (perm (PermQuotCond.toHom (PermQuotCond.ofHom σ)) t)
+  · congr
+    exact (Hom.ext_iff σ (PermQuotCond.ofHom σ).toHom).mp (congrFun rfl)
+  · rfl
 
-
+lemma permQuot_ι_eq_perm {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
+      (σ : Fin n → Fin m) (h : PermQuotCond c c1 σ) (t : TensorTree S c) :
+      permQuot σ h (ι t) = ι (perm h.toHom t) := by rfl
 /-!
 
 ## Relations
 
 -/
+variable  {S : TensorSpecies k} {n n' n2 : ℕ} {c : Fin n → S.C} {c' : Fin n' → S.C}
+  {c2 : Fin n2 → S.C}
+
+def permQuotProdQuotLeft (n2 : ℕ) (σ : Fin n → Fin n') : Fin (n + n2) → Fin (n' + n2) :=
+    finSumFinEquiv ∘ Sum.map σ id ∘ finSumFinEquiv.symm
+
+lemma PermQuotCond.prod_left {σ : Fin n → Fin n'} (c2 : Fin n2 → S.C) (h : PermQuotCond c c' σ) :
+    PermQuotCond (Sum.elim c c2 ∘ finSumFinEquiv.symm)
+      (Sum.elim c' c2 ∘ finSumFinEquiv.symm) (permQuotProdQuotLeft n2 σ) := by
+  apply And.intro
+  · rw [permQuotProdQuotLeft]
+    refine (Equiv.comp_bijective (Sum.map σ id ∘ ⇑finSumFinEquiv.symm) finSumFinEquiv).mpr ?_
+    refine (Equiv.bijective_comp finSumFinEquiv.symm (Sum.map σ id)).mpr ?_
+    refine Sum.map_bijective.mpr ?_
+    apply And.intro
+    · exact h.1
+    · exact Function.bijective_id
+  · intro i
+    obtain ⟨i, rfl⟩ := finSumFinEquiv.surjective i
+    simp [permQuotProdQuotLeft]
+    match i with
+    | Sum.inl i => simp [h.2]
+    | Sum.inr i => rfl
+
+def permQuotProdQuotRight (n2 : ℕ) (σ : Fin n → Fin n') : Fin (n2 + n) → Fin (n2 + n') :=
+    finSumFinEquiv ∘ Sum.map id σ ∘ finSumFinEquiv.symm
+
+lemma PermQuotCond.prod_right {σ : Fin n → Fin n'} (c2 : Fin n2 → S.C) (h : PermQuotCond c c' σ) :
+    PermQuotCond (Sum.elim c2 c ∘ finSumFinEquiv.symm)
+      (Sum.elim c2 c' ∘ finSumFinEquiv.symm) (permQuotProdQuotRight n2 σ) := by
+  apply And.intro
+  · rw [permQuotProdQuotRight]
+    refine (Equiv.comp_bijective (Sum.map id σ ∘ ⇑finSumFinEquiv.symm) finSumFinEquiv).mpr ?_
+    refine (Equiv.bijective_comp finSumFinEquiv.symm (Sum.map id σ)).mpr ?_
+    refine Sum.map_bijective.mpr ?_
+    apply And.intro
+    · exact Function.bijective_id
+    · exact h.1
+  · intro i
+    obtain ⟨i, rfl⟩ := finSumFinEquiv.surjective i
+    simp [permQuotProdQuotRight]
+    match i with
+    | Sum.inl i => rfl
+    | Sum.inr i => simp [h.2]
 
 @[simp]
-lemma prodQuot_permQuot_left (t : S.TensorTreeQuot c) (t2 : S.TensorTreeQuot c2) :
-    (prodQuot (permQuot σ t) t2) = (permQuot (TensorTree.permProdLeft c2 σ) (prodQuot t t2)) := by
+lemma prodQuot_permQuot_left {σ : Fin n → Fin n'} {h : PermQuotCond c c' σ}
+    (t : S.TensorTreeQuot c) (t2 : S.TensorTreeQuot c2) :
+    prodQuot (permQuot σ h t) t2 =
+    permQuot (permQuotProdQuotLeft n2 σ) (h.prod_left c2) (prodQuot t t2) := by
   obtain ⟨t, rfl⟩ := ι_surjective t
   obtain ⟨t2, rfl⟩ := ι_surjective t2
-  rw [← ι_prod_eq_prodQuot, ← ι_perm_eq_permQuot, ← ι_perm_eq_permQuot, ← ι_prod_eq_prodQuot]
+  rw [permQuot_ι_eq_perm, ← ι_prod_eq_prodQuot, ← ι_prod_eq_prodQuot, permQuot_ι_eq_perm]
   rw [ι_apply_eq_iff_tensor_apply_eq]
   rw [prod_perm_left]
+  rw [← ι_apply_eq_iff_tensor_apply_eq]
+  simp only [Functor.id_obj, ι_perm_eq_permQuot, permProdLeft_toEquiv, ι_prod_eq_prodQuot]
+  rfl
 
 @[simp]
-lemma prodQuot_permQuot_right (t2 : S.TensorTreeQuot c2) (t : S.TensorTreeQuot c) :
-    (prodQuot t2 (permQuot σ t)) = (permQuot (TensorTree.permProdRight c2 σ) (prodQuot t2 t)) := by
+lemma prodQuot_permQuot_right {σ : Fin n → Fin n'} {h : PermQuotCond c c' σ}
+     (t2 : S.TensorTreeQuot c2) (t : S.TensorTreeQuot c) :
+    prodQuot t2 (permQuot σ h t) =
+    permQuot (permQuotProdQuotRight n2 σ) (h.prod_right c2) (prodQuot t2 t) := by
   obtain ⟨t, rfl⟩ := ι_surjective t
   obtain ⟨t2, rfl⟩ := ι_surjective t2
-  rw [← ι_prod_eq_prodQuot, ← ι_perm_eq_permQuot, ← ι_perm_eq_permQuot, ← ι_prod_eq_prodQuot]
+  rw [permQuot_ι_eq_perm, ← ι_prod_eq_prodQuot, ← ι_prod_eq_prodQuot, permQuot_ι_eq_perm]
   rw [ι_apply_eq_iff_tensor_apply_eq]
   rw [prod_perm_right]
+  rw [← ι_apply_eq_iff_tensor_apply_eq]
+  simp only [Functor.id_obj, ι_perm_eq_permQuot, permProdRight_toEquiv, ι_prod_eq_prodQuot]
+  rfl
 
 @[simp]
 lemma permQuot_permQuot {n n1 n2 : ℕ} {c : Fin n → S.C} {c1 : Fin n1 → S.C} {c2 : Fin n2 → S.C}
-    (σ : (OverColor.mk c) ⟶ (OverColor.mk c1)) (σ2 : (OverColor.mk c1) ⟶ (OverColor.mk c2))
-    (t : S.TensorTreeQuot c) : (permQuot σ2 (permQuot σ t)) = (permQuot (σ ≫ σ2) t) := by
+    {σ : Fin n → Fin n1} {σ2 : Fin n1 → Fin n2} (h : PermQuotCond c c1 σ)
+    (h2 : PermQuotCond c1 c2 σ2)
+    (t : S.TensorTreeQuot c) : (permQuot σ2 h2 (permQuot σ h t)) = (permQuot (σ2 ∘ σ) (h.comp h2) t) := by
   obtain ⟨t, rfl⟩ := ι_surjective t
-  rw [← ι_perm_eq_permQuot, ← ι_perm_eq_permQuot, ← ι_perm_eq_permQuot]
+  rw [permQuot_ι_eq_perm, permQuot_ι_eq_perm, permQuot_ι_eq_perm]
   rw [ι_apply_eq_iff_tensor_apply_eq]
   rw [perm_perm]
+  congr
+  exact (Hom.ext_iff (h.toHom ≫ h2.toHom) (PermQuotCond.comp h h2).toHom).mp (congrFun rfl)
 
+lemma contrQuot_permQuot {n n' : ℕ} {c : Fin (n + 1 + 1) → S.C} {c1 : Fin (n' + 1 + 1) → S.C}
+    {i : Fin (n + 1 + 1)} {j : Fin (n + 1)}
+    {h : c1 (i.succAbove j) = S.τ (c1 i)} (t : S.TensorTreeQuot c)
+    (σ : Fin (n + 1 + 1) → Fin (n' + 1 + 1)) (hσ : PermQuotCond c c1 σ) :
+    contrQuot i j h (permQuot σ hσ t)
+    = (perm (extractTwo i j σ) (contr ((Hom.toEquiv σ).symm i)
+    (((Hom.toEquiv (extractOne i σ))).symm j) (S.perm_contr_cond h σ) t)).tensor := by
+  rw [contr_tensor, perm_tensor, perm_tensor]
+  change ((S.F.map σ) ≫ S.contrMap c1 i j h).hom t.tensor = _
+  rw [S.contrMap_naturality σ]
+  rfl
+
+#lint only simpNF
 end TensorTreeQuot
 
 end TensorTree
