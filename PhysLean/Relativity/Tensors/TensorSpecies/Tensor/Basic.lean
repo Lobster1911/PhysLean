@@ -51,6 +51,16 @@ lemma congr_right {n : ℕ} {c : Fin n → S.C} (p : Pure S c)
   subst h
   simp
 
+lemma congr_mid {n : ℕ} {c : Fin n → S.C} (c' : S.C) (p : Pure S c)
+    (i j : Fin n) (h : i = j) (hi : c i = c') (hj : c j = c') :
+    S.FD.map (eqToHom (by rw [hi] :  { as := c i } = { as := c' } ))  (p i)  =
+    S.FD.map (eqToHom (by rw [hj] :  { as := c j } = { as := c' } ))  (p j)  := by
+  subst hi
+  simp
+  symm
+  apply congr_right
+  exact h
+
 noncomputable def toTensor {n : ℕ} {c : Fin n → S.C} (p : Pure S c) : S.Tensor c :=
   PiTensorProduct.tprod k p
 
