@@ -652,24 +652,33 @@ lemma prodT_pure  {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
 
 /--
 
-## Interaction of product and perms
+## Product Maps
 
+These maps are used in permutations of tensors.
 -/
 
-def permProdLeftMap (n2 : ℕ) (σ : Fin n → Fin n') : Fin (n + n2) → Fin (n' + n2) :=
+
+def prodLeftMap (n2 : ℕ) (σ : Fin n → Fin n') : Fin (n + n2) → Fin (n' + n2) :=
     finSumFinEquiv ∘ Sum.map σ id ∘ finSumFinEquiv.symm
 
-def permProdRightMap (n2 : ℕ) (σ : Fin n → Fin n') : Fin (n2 + n) → Fin (n2 + n') :=
+def prodRightMap (n2 : ℕ) (σ : Fin n → Fin n') : Fin (n2 + n) → Fin (n2 + n') :=
     finSumFinEquiv ∘ Sum.map id σ ∘ finSumFinEquiv.symm
 
-def assocProdMap (n1 n2 n3 : ℕ) : Fin (n1 + n2 + n3) → Fin (n1 + (n2 + n3)) :=
+def prodAssocMap (n1 n2 n3 : ℕ) : Fin (n1 + n2 + n3) → Fin (n1 + (n2 + n3)) :=
     Fin.cast (Nat.add_assoc n1 n2 n3)
 
-lemma PermCond.prod_left {σ : Fin n' → Fin n} (c2 : Fin n2 → S.C) (h : PermCond c c' σ) :
+def prodAssocMap' (n1 n2 n3 : ℕ) : Fin (n1 + (n2 + n3)) → Fin (n1 + n2 + n3) :=
+    Fin.cast (Nat.add_assoc n1 n2 n3).symm
+
+def prodSwapMap (n1 n2 : ℕ) : Fin (n1 + n2) → Fin (n2 + n1) :=
+   finSumFinEquiv ∘ Sum.swap ∘ finSumFinEquiv.symm
+
+@[simp]
+lemma prodLeftMap_permCond {σ : Fin n' → Fin n} (c2 : Fin n2 → S.C) (h : PermCond c c' σ) :
     PermCond (Sum.elim c c2 ∘ finSumFinEquiv.symm)
-      (Sum.elim c' c2 ∘ finSumFinEquiv.symm) (permProdLeftMap n2 σ) := by
+      (Sum.elim c' c2 ∘ finSumFinEquiv.symm) (prodLeftMap n2 σ) := by
   apply And.intro
-  · rw [permProdLeftMap]
+  · rw [prodLeftMap]
     refine (Equiv.comp_bijective (Sum.map σ id ∘ ⇑finSumFinEquiv.symm) finSumFinEquiv).mpr ?_
     refine (Equiv.bijective_comp finSumFinEquiv.symm (Sum.map σ id)).mpr ?_
     refine Sum.map_bijective.mpr ?_
@@ -678,16 +687,17 @@ lemma PermCond.prod_left {σ : Fin n' → Fin n} (c2 : Fin n2 → S.C) (h : Perm
     · exact Function.bijective_id
   · intro i
     obtain ⟨i, rfl⟩ := finSumFinEquiv.surjective i
-    simp [permProdLeftMap]
+    simp [prodLeftMap]
     match i with
     | Sum.inl i => simp [h.2]
     | Sum.inr i => rfl
 
-lemma PermCond.prod_right {σ : Fin n' → Fin n} (c2 : Fin n2 → S.C) (h : PermCond c c' σ) :
+@[simp]
+lemma prodRightMap_permCond {σ : Fin n' → Fin n} (c2 : Fin n2 → S.C) (h : PermCond c c' σ) :
     PermCond (Sum.elim c2 c ∘ finSumFinEquiv.symm)
-      (Sum.elim c2 c' ∘ finSumFinEquiv.symm) (permProdRightMap n2 σ) := by
+      (Sum.elim c2 c' ∘ finSumFinEquiv.symm) (prodRightMap n2 σ) := by
   apply And.intro
-  · rw [permProdRightMap]
+  · rw [prodRightMap]
     refine (Equiv.comp_bijective (Sum.map id σ ∘ ⇑finSumFinEquiv.symm) finSumFinEquiv).mpr ?_
     refine (Equiv.bijective_comp finSumFinEquiv.symm (Sum.map id σ)).mpr ?_
     refine Sum.map_bijective.mpr ?_
@@ -696,10 +706,68 @@ lemma PermCond.prod_right {σ : Fin n' → Fin n} (c2 : Fin n2 → S.C) (h : Per
     · exact h.1
   · intro i
     obtain ⟨i, rfl⟩ := finSumFinEquiv.surjective i
-    simp [permProdRightMap]
+    simp [prodRightMap]
     match i with
     | Sum.inl i => rfl
     | Sum.inr i => simp [h.2]
+
+@[simp]
+lemma prodSwapMap_permCond {n1 n2 : ℕ} {c : Fin n1 → S.C} {c2 : Fin n2 → S.C} :
+    PermCond (Sum.elim c c2 ∘ finSumFinEquiv.symm)
+      (Sum.elim c2 c ∘ finSumFinEquiv.symm) (prodSwapMap n2 n1) := by
+  sorry
+
+@[simp]
+lemma prodAssocMap_permCond {n1 n2 n3 : ℕ} {c : Fin n1 → S.C} {c2 : Fin n2 → S.C} {c3 : Fin n3 → S.C} :
+      PermCond (Sum.elim c (Sum.elim c2 c3 ∘ finSumFinEquiv.symm) ∘ finSumFinEquiv.symm)
+      (Sum.elim (Sum.elim c c2  ∘ finSumFinEquiv.symm) c3 ∘ finSumFinEquiv.symm)
+      (prodAssocMap n1 n2 n3) := by
+  sorry
+
+@[simp]
+lemma prodAssocMap'_permCond {n1 n2 n3 : ℕ} {c : Fin n1 → S.C} {c2 : Fin n2 → S.C} {c3 : Fin n3 → S.C} :
+      PermCond
+      (Sum.elim (Sum.elim c c2  ∘ finSumFinEquiv.symm) c3 ∘ finSumFinEquiv.symm)
+      (Sum.elim c (Sum.elim c2 c3 ∘ finSumFinEquiv.symm) ∘ finSumFinEquiv.symm)
+      (prodAssocMap' n1 n2 n3) := by
+  sorry
+/-!
+
+## Relationships assocaited with products
+
+-/
+
+
+proof_wanted prodT_equivariant {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
+    (g : S.G) (t : S.Tensor c) (t1 : S.Tensor c1) :
+    prodT (g • t) (g • t1) = g • prodT t t1
+
+proof_wanted prodT_permT_left {n n' n1} {c : Fin n → S.C} {c' : Fin n' → S.C}
+    {c1 : Fin n1 → S.C}
+    (σ : Fin n' → Fin n) (h : PermCond c c' σ) (t : S.Tensor c) (t2 : S.Tensor c2) :
+    prodT (permT σ h t) t2 = permT (prodLeftMap n2 σ) (prodLeftMap_permCond c2 h) (prodT t t2)
+
+proof_wanted prodT_permT_right {n n' n1} {c : Fin n → S.C} {c' : Fin n' → S.C}
+    {c1 : Fin n1 → S.C}
+    (σ : Fin n' → Fin n) (h : PermCond c c' σ) (t : S.Tensor c) (t2 : S.Tensor c2) :
+    prodT (permT σ h t) t2 = permT (prodLeftMap n2 σ) (prodLeftMap_permCond c2 h) (prodT t t2)
+
+proof_wanted prodT_swap {n n1} {c : Fin n → S.C}
+    {c1 : Fin n1 → S.C}
+    (t : S.Tensor c) (t1 : S.Tensor c1) :
+    prodT t t1 = permT (prodSwapMap n n1) (prodSwapMap_permCond) (prodT t1 t)
+
+proof_wanted prodT_assoc {n n1 n2} {c : Fin n → S.C}
+    {c1 : Fin n1 → S.C} {c2 : Fin n2 → S.C}
+    (t : S.Tensor c) (t1 : S.Tensor c1) (t2 : S.Tensor c2) :
+    prodT (prodT t t1) t2 =
+    permT (prodAssocMap n n1 n2) (prodAssocMap_permCond) (prodT t (prodT t1 t2))
+
+proof_wanted prodT_assoc' {n n1 n2} {c : Fin n → S.C}
+    {c1 : Fin n1 → S.C} {c2 : Fin n2 → S.C}
+    (t : S.Tensor c) (t1 : S.Tensor c1) (t2 : S.Tensor c2) :
+    prodT t (prodT t1 t2) =
+    permT (prodAssocMap' n n1 n2) (prodAssocMap'_permCond) (prodT (prodT t t1) t2)
 
 end Tensor
 

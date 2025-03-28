@@ -43,12 +43,10 @@ def dropPairEmb (i j : Fin (n + 1 + 1)) (hij : i ≠ j) : Fin n ↪o Fin (n + 1 
   (Finset.orderEmbOfFin {i, j}ᶜ
   (by rw [Finset.card_compl]; simp [Finset.card_pair hij]))
 
-
 lemma dropPairEmb_apply_eq_orderIsoOfFin {i j : Fin (n + 1 + 1)} (hij : i ≠ j) (m : Fin n) :
     (dropPairEmb i j hij) m = (Finset.orderIsoOfFin {i, j}ᶜ
       (by rw [Finset.card_compl]; simp [Finset.card_pair hij])) m := by
   simp [dropPairEmb]
-
 
 lemma dropPairEmb_symm (i j : Fin (n + 1 + 1)) (hij : i ≠ j) :
     dropPairEmb i j hij = dropPairEmb j i hij.symm := by
@@ -74,7 +72,7 @@ lemma dropPairEmb_range {i j : Fin (n + 1 + 1)} (hij : i ≠ j) :
     simp_all only [not_false_eq_true, and_self]
 
 lemma dropPairEmb_image_compl {i j : Fin (n + 1 + 1)} (hij : i ≠ j)
-      (X : Set (Fin n)) :
+    (X : Set (Fin n)) :
     (dropPairEmb i j hij) '' Xᶜ = ({i, j} ∪ dropPairEmb i j hij '' X)ᶜ := by
   rw [← compl_inj_iff, Function.Injective.compl_image_eq (dropPairEmb i j hij).injective]
   simp only [compl_compl, dropPairEmb_range,  Set.union_singleton]
@@ -212,6 +210,57 @@ lemma eq_or_exists_dropPairEmb
 
 /-!
 
+## dropPairOfMap
+
+-/
+
+def dropPairOfMap {n n1 : ℕ} (i j : Fin (n1 + 1 + 1)) (hij : i ≠ j)
+    (σ : Fin (n1 + 1 + 1) → Fin (n + 1 + 1)) (hσ : Function.Bijective σ)
+    (m : Fin n1) : Fin n :=
+  dropPairEmbPre (σ i) (σ j)
+    (by simp [hσ.injective.eq_iff, hij])
+    (σ (dropPairEmb i j hij m)) (by simp [hσ.injective.eq_iff, Ne.symm])
+
+lemma dropPairOfMap_injective {n n1 : ℕ} (i j : Fin (n1 + 1 + 1)) (hij : i ≠ j)
+    (σ : Fin (n1 + 1 + 1) → Fin (n + 1 + 1)) (hσ : Function.Bijective σ) :
+    Function.Injective (dropPairOfMap i j hij σ hσ) := by
+  intro m1 m2 h
+  simpa [dropPairOfMap, hσ.injective.eq_iff] using h
+
+lemma dropPairOfMap_surjective {n n1 : ℕ} (i j : Fin (n1 + 1 + 1)) (hij : i ≠ j)
+    (σ : Fin (n1 + 1 + 1) → Fin (n + 1 + 1)) (hσ : Function.Bijective σ) :
+    Function.Surjective (dropPairOfMap i j hij σ hσ) := by
+  intro m
+  simp [dropPairOfMap, hσ.surjective]
+  obtain ⟨m, hm, rfl⟩ := dropPairEmbPre_surjective (σ i) (σ j) (by simp [hσ.injective.eq_iff, hij]) m
+  simp
+  obtain ⟨m', rfl⟩ := hσ.surjective m
+  simp [hσ.injective.eq_iff] at hm ⊢
+  rcases eq_or_exists_dropPairEmb i j hij m' with rfl | rfl | ⟨m'', rfl⟩
+  · simp_all
+  · simp_all
+  · exact ⟨m'', rfl⟩
+
+lemma dropPairOfMap_bijective {n n1 : ℕ} (i j : Fin (n1 + 1 + 1)) (hij : i ≠ j)
+    (σ : Fin (n1 + 1 + 1) → Fin (n + 1 + 1)) (hσ : Function.Bijective σ) :
+    Function.Bijective (dropPairOfMap i j hij σ hσ) := by
+  apply And.intro
+  · apply dropPairOfMap_injective
+  · apply dropPairOfMap_surjective
+
+lemma permCond_dropPairOfMap {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
+    {c1 : Fin (n1 + 1 + 1) → S.C}
+    (i j : Fin (n1 + 1 + 1)) (hij : i ≠ j)
+    (σ : Fin (n1 + 1 + 1) → Fin (n + 1 + 1)) (hσ : PermCond c c1 σ) :
+    PermCond (c ∘ dropPairEmb (σ i) (σ j) (by simp [hσ.1.injective.eq_iff, hij]))
+      (c1 ∘ dropPairEmb i j hij) (dropPairOfMap i j hij σ hσ.1)  := by
+  apply And.intro
+  · exact dropPairOfMap_bijective i j hij σ hσ.left
+  · intro m
+    simp [dropPairOfMap, hσ.2]
+
+/-!
+
 ## dropPair
 
 -/
@@ -293,56 +342,6 @@ lemma dropPair_update_dropPairEmb {n : ℕ} [inst : DecidableEq (Fin (n + 1 +1))
 
 TODO "Prove lemmas relating to the commutation rules of `dropPair` and `prodP`."
 
-/-!
-
-## dropPairOfMap
-
--/
-
-def dropPairOfMap {n n1 : ℕ} (i j : Fin (n1 + 1 + 1)) (hij : i ≠ j)
-    (σ : Fin (n1 + 1 + 1) → Fin (n + 1 + 1)) (hσ : Function.Bijective σ)
-    (m : Fin n1) : Fin n :=
-  dropPairEmbPre (σ i) (σ j)
-    (by simp [hσ.injective.eq_iff, hij])
-    (σ (dropPairEmb i j hij m)) (by simp [hσ.injective.eq_iff, Ne.symm])
-
-lemma dropPairOfMap_injective {n n1 : ℕ} (i j : Fin (n1 + 1 + 1)) (hij : i ≠ j)
-    (σ : Fin (n1 + 1 + 1) → Fin (n + 1 + 1)) (hσ : Function.Bijective σ) :
-    Function.Injective (dropPairOfMap i j hij σ hσ) := by
-  intro m1 m2 h
-  simpa [dropPairOfMap, hσ.injective.eq_iff] using h
-
-lemma dropPairOfMap_surjective {n n1 : ℕ} (i j : Fin (n1 + 1 + 1)) (hij : i ≠ j)
-    (σ : Fin (n1 + 1 + 1) → Fin (n + 1 + 1)) (hσ : Function.Bijective σ) :
-    Function.Surjective (dropPairOfMap i j hij σ hσ) := by
-  intro m
-  simp [dropPairOfMap, hσ.surjective]
-  obtain ⟨m, hm, rfl⟩ := dropPairEmbPre_surjective (σ i) (σ j) (by simp [hσ.injective.eq_iff, hij]) m
-  simp
-  obtain ⟨m', rfl⟩ := hσ.surjective m
-  simp [hσ.injective.eq_iff] at hm ⊢
-  rcases eq_or_exists_dropPairEmb i j hij m' with rfl | rfl | ⟨m'', rfl⟩
-  · simp_all
-  · simp_all
-  · exact ⟨m'', rfl⟩
-
-lemma dropPairOfMap_bijective {n n1 : ℕ} (i j : Fin (n1 + 1 + 1)) (hij : i ≠ j)
-    (σ : Fin (n1 + 1 + 1) → Fin (n + 1 + 1)) (hσ : Function.Bijective σ) :
-    Function.Bijective (dropPairOfMap i j hij σ hσ) := by
-  apply And.intro
-  · apply dropPairOfMap_injective
-  · apply dropPairOfMap_surjective
-
-lemma permCond_dropPairOfMap {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
-    {c1 : Fin (n1 + 1 + 1) → S.C}
-    (i j : Fin (n1 + 1 + 1)) (hij : i ≠ j)
-    (σ : Fin (n1 + 1 + 1) → Fin (n + 1 + 1)) (hσ : PermCond c c1 σ) :
-    PermCond (c ∘ dropPairEmb (σ i) (σ j) (by simp [hσ.1.injective.eq_iff, hij]))
-      (c1 ∘ dropPairEmb i j hij) (dropPairOfMap i j hij σ hσ.1)  := by
-  apply And.intro
-  · exact dropPairOfMap_bijective i j hij σ hσ.left
-  · intro m
-    simp [dropPairOfMap, hσ.2]
 
 @[simp]
 lemma dropPair_permP {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
@@ -363,7 +362,6 @@ lemma dropPair_permP {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
 ## Contraction coefficent
 
 -/
-
 
 noncomputable def contrPCoeff {n : ℕ} {c : Fin n → S.C}
     (i j : Fin n) (hij : i ≠ j ∧ c i = S.τ (c j)) (p : Pure S c) : k :=
