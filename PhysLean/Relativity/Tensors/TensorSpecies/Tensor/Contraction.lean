@@ -551,7 +551,7 @@ lemma contrP_update_smul {n : ℕ} [inst : DecidableEq (Fin (n + 1 +1))]  {c : F
 lemma contrP_equivariant {n : ℕ} {c : Fin (n + 1 + 1) → S.C}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ c i = S.τ (c j)) (p : Pure S c) (g : S.G) :
     contrP i j hij (g • p) = g • contrP i j hij p := by
-  simp [contrP, contrPCoeff_invariant, dropPair_equivariant, actionT_toTensor]
+  simp [contrP, contrPCoeff_invariant, dropPair_equivariant, actionT_pure]
 
 lemma contrP_symm {n : ℕ} {c : Fin (n + 1 + 1) → S.C}
     {i j : Fin (n + 1 + 1)} {hij : i ≠ j ∧ c i = S.τ (c j)} {p : Pure S c} :
@@ -616,10 +616,10 @@ lemma contrT_equivariant {n : ℕ} {c : Fin (n + 1 + 1) → S.C}
   apply induction_on_pure
   · intro p
     simp [P]
-    rw [actionT_toTensor, contrT_pure]
+    rw [actionT_pure, contrT_pure]
     simp [Pure.contrP]
     congr 1
-    exact Eq.symm actionT_toTensor
+    exact Eq.symm actionT_pure
   · intro p q hp
     simp [P, hp]
   · intro p r hr hp
@@ -717,6 +717,29 @@ lemma contrT_comm {n : ℕ} {c : Fin (n + 1 + 1 + 1 + 1) → S.C}
     conv_rhs => enter [2, 2]; rw [map_add]
     conv_rhs => enter [2]; rw [map_add]
     conv_rhs => rw [map_add]
+
+
+/-!
+
+## Products and contractions
+
+-/
+
+proof_wanted prodT_contrT_snd {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
+    {c1 : Fin n1 → S.C}
+    (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ c i = S.τ (c j))
+    (t : Tensor S c) (t1 : Tensor S c1) :
+    prodT t1 (contrT i j hij t) =
+    (permT id (And.intro (Function.bijective_id) (by
+      intro k
+      simp only [Nat.add_eq, id_eq, Function.comp_apply]
+      sorry
+      )) <|
+    contrT
+      (finSumFinEquiv (m := n1) (Sum.inr i))
+      (finSumFinEquiv (m := n1) (Sum.inr j))
+      (by simp [hij, - finSumFinEquiv_apply_right, finSumFinEquiv.injective.eq_iff]) <|
+    prodT t1 t)
 
 end Tensor
 

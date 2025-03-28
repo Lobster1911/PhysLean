@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Joseph Tooby-Smith
 -/
 import PhysLean.Relativity.Lorentz.ComplexTensor.Basis
-import PhysLean.Relativity.Tensors.Tree.EquivalenceClass.Basic
 /-!
 
 ## Lemmas related to complex Lorentz tensors.
@@ -25,20 +24,11 @@ noncomputable section
 
 namespace complexLorentzTensor
 open PhysLean.Fin
-
-open TensorTreeQuot
+/-
 lemma antiSymm_contr_symm {A : ℂT[.up, .up]} {S : ℂT[.down, .down]}
     (hA : {A | μ ν = - (A | ν μ)}ᵀ) (hs : {S | μ ν = S | ν μ}ᵀ) :
     {A | μ ν ⊗ S | μ ν = - A | μ ν ⊗ S | μ ν}ᵀ := by
-  rw [← ι_apply_eq_iff_tensor_apply_eq] at hA hs ⊢
-  simp at hA hs ⊢
-  conv_lhs => rw [hA, hs]
-  simp
-  rw [prodQuot_permQuot_right, prodQuot_permQuot_left,
-    permQuot_permQuot]
 
-  sorry
-/-
   conv =>
     lhs
     rw [contr_tensor_eq <| contr_tensor_eq <| prod_tensor_eq_fst <| hA]
