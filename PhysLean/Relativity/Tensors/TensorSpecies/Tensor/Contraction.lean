@@ -21,11 +21,9 @@ variable {k : Type} [CommRing k] {S : TensorSpecies k}
 
 namespace Tensor
 
-
 /-!
 
 ## Pure.contrPCoeff
-
 
 -/
 
@@ -57,7 +55,6 @@ lemma permCond_dropPairEmb_symm (i j : Fin (n + 1 + 1)) (hij : i ≠ j) :
     PermCond (c ∘ dropPairEmb i j hij) (c ∘ dropPairEmb j i hij.symm) id :=
   And.intro (Function.bijective_id) (by rw [dropPairEmb_symm]; simp)
 
-
 @[simp]
 lemma dropPairEmb_range {i j : Fin (n + 1 + 1)} (hij : i ≠ j) :
     Set.range (dropPairEmb i j hij) = {i, j}ᶜ := by
@@ -75,12 +72,12 @@ lemma dropPairEmb_image_compl {i j : Fin (n + 1 + 1)} (hij : i ≠ j)
     (X : Set (Fin n)) :
     (dropPairEmb i j hij) '' Xᶜ = ({i, j} ∪ dropPairEmb i j hij '' X)ᶜ := by
   rw [← compl_inj_iff, Function.Injective.compl_image_eq (dropPairEmb i j hij).injective]
-  simp only [compl_compl, dropPairEmb_range,  Set.union_singleton]
+  simp only [compl_compl, dropPairEmb_range, Set.union_singleton]
   exact Set.union_comm (⇑(dropPairEmb i j hij) '' X) {i, j}
 
 @[simp]
 lemma fst_neq_dropPairEmb_pre (i j : Fin (n + 1 + 1)) (hij : i ≠ j) (m : Fin n) :
-    ¬ i = (dropPairEmb i j hij) m  := by
+    ¬ i = (dropPairEmb i j hij) m := by
   by_contra hn
   have hi : i ∉ Set.range (dropPairEmb i j hij) := by
     simp [dropPairEmb]
@@ -89,7 +86,7 @@ lemma fst_neq_dropPairEmb_pre (i j : Fin (n + 1 + 1)) (hij : i ≠ j) (m : Fin n
 
 @[simp]
 lemma snd_neq_dropPairEmb_pre (i j : Fin (n + 1 + 1)) (hij : i ≠ j) (m : Fin n) :
-    ¬ j = (dropPairEmb i j hij) m  := by
+    ¬ j = (dropPairEmb i j hij) m := by
   by_contra hn
   have hi : j ∉ Set.range (dropPairEmb i j hij) := by
     simp [dropPairEmb]
@@ -110,7 +107,7 @@ lemma dropPairEmb_dropPairEmbPre (i j : Fin (n + 1 + 1)) (hij : i ≠ j) (m : Fi
 @[simp]
 lemma dropPairEmbPre_injective (i j : Fin (n + 1 + 1)) (hij : i ≠ j)
     (m1 m2 : Fin (n + 1 + 1)) (hm1 : m1 ≠ i ∧ m1 ≠ j) (hm2 : m2 ≠ i ∧ m2 ≠ j) :
-    dropPairEmbPre i j hij m1 hm1 = dropPairEmbPre i j hij m2 hm2  ↔ m1 = m2 := by
+    dropPairEmbPre i j hij m1 hm1 = dropPairEmbPre i j hij m2 hm2 ↔ m1 = m2 := by
   rw [← Function.Injective.eq_iff (dropPairEmb i j hij).injective]
   simp
 
@@ -125,7 +122,6 @@ lemma dropPairEmbPre_surjective (i j : Fin (n + 1 + 1)) (hij : i ≠ j)
   apply (dropPairEmb i j hij).injective
   simp
 
-
 lemma dropPairEmb_comm (i1 j1 : Fin (n + 1 + 1 + 1 + 1)) (i2 j2 : Fin (n + 1 + 1))
     (hij1 : i1 ≠ j1) (hij2 : i2 ≠ j2) :
     let i2' := (dropPairEmb i1 j1 hij1 i2);
@@ -139,10 +135,12 @@ lemma dropPairEmb_comm (i1 j1 : Fin (n + 1 + 1 + 1 + 1)) (i2 j2 : Fin (n + 1 + 1
   intro i2' j2' hi2j2'
   let fl : Fin n ↪o Fin (n + 1 + 1 + 1 + 1) :=
     ⟨⟨dropPairEmb i1 j1 hij1 ∘ dropPairEmb i2 j2 hij2, by
-      refine (EmbeddingLike.comp_injective (⇑(dropPairEmb i2 j2 hij2)) (dropPairEmb i1 j1 hij1)).mpr ?_
+      refine (EmbeddingLike.comp_injective (⇑(dropPairEmb i2 j2 hij2))
+        (dropPairEmb i1 j1 hij1)).mpr ?_
       exact RelEmbedding.injective (dropPairEmb i2 j2 hij2)⟩, by simp⟩
   let fr : Fin n ↪o Fin (n + 1 + 1 + 1 + 1) :=
-    ⟨⟨dropPairEmb i2' j2' hi2j2' ∘ dropPairEmb (dropPairEmbPre i2' j2' hi2j2' i1 (by simp [i2', j2']))
+    ⟨⟨dropPairEmb i2' j2' hi2j2' ∘ dropPairEmb
+      (dropPairEmbPre i2' j2' hi2j2' i1 (by simp [i2', j2']))
       (dropPairEmbPre i2' j2' hi2j2' j1 (by simp [i2', j2'])) (by simp [hij1]),
       by
       refine (EmbeddingLike.comp_injective _ _).mpr ?_
@@ -158,7 +156,7 @@ lemma dropPairEmb_comm (i1 j1 : Fin (n + 1 + 1 + 1 + 1)) (i2 j2 : Fin (n + 1 + 1
   ext1 a
   simpa [fl, fr] using congrFun (congrArg (fun x => x.toFun) h) a
 
-lemma dropPairEmb_comm_apply  (i1 j1 : Fin (n + 1 + 1 + 1 + 1)) (i2 j2 : Fin (n + 1 + 1))
+lemma dropPairEmb_comm_apply (i1 j1 : Fin (n + 1 + 1 + 1 + 1)) (i2 j2 : Fin (n + 1 + 1))
     (hij1 : i1 ≠ j1) (hij2 : i2 ≠ j2) (m : Fin n) :
     let i2' := (dropPairEmb i1 j1 hij1 i2);
     let j2' := (dropPairEmb i1 j1 hij1 j2);
@@ -166,13 +164,12 @@ lemma dropPairEmb_comm_apply  (i1 j1 : Fin (n + 1 + 1 + 1 + 1)) (i2 j2 : Fin (n 
     let i1' := (dropPairEmbPre i2' j2' hi2j2' i1 (by simp [i2', j2']));
     let j1' := (dropPairEmbPre i2' j2' hi2j2' j1 (by simp [i2', j2']));
     dropPairEmb i2' j2' hi2j2'
-    (dropPairEmb i1' j1' (by simp [i1', j1', hij1])  m) =
-    dropPairEmb i1 j1 hij1  (dropPairEmb i2 j2 hij2 m) := by
+    (dropPairEmb i1' j1' (by simp [i1', j1', hij1]) m) =
+    dropPairEmb i1 j1 hij1 (dropPairEmb i2 j2 hij2 m) := by
   intro i2' j2' hi2j2' i1' j1'
   change _ = (dropPairEmb i1 j1 hij1 ∘ dropPairEmb i2 j2 hij2) m
   rw [dropPairEmb_comm i1 j1 i2 j2 hij1 hij2]
   rfl
-
 
 @[simp]
 lemma permCond_dropPairEmb_comm {n : ℕ} {c : Fin (n + 1 + 1 + 1 + 1) → S.C}
@@ -232,7 +229,8 @@ lemma dropPairOfMap_surjective {n n1 : ℕ} (i j : Fin (n1 + 1 + 1)) (hij : i �
     Function.Surjective (dropPairOfMap i j hij σ hσ) := by
   intro m
   simp [dropPairOfMap, hσ.surjective]
-  obtain ⟨m, hm, rfl⟩ := dropPairEmbPre_surjective (σ i) (σ j) (by simp [hσ.injective.eq_iff, hij]) m
+  obtain ⟨m, hm, rfl⟩ := dropPairEmbPre_surjective (σ i) (σ j)
+    (by simp [hσ.injective.eq_iff, hij]) m
   simp
   obtain ⟨m', rfl⟩ := hσ.surjective m
   simp [hσ.injective.eq_iff] at hm ⊢
@@ -253,7 +251,7 @@ lemma permCond_dropPairOfMap {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
     (i j : Fin (n1 + 1 + 1)) (hij : i ≠ j)
     (σ : Fin (n1 + 1 + 1) → Fin (n + 1 + 1)) (hσ : PermCond c c1 σ) :
     PermCond (c ∘ dropPairEmb (σ i) (σ j) (by simp [hσ.1.injective.eq_iff, hij]))
-      (c1 ∘ dropPairEmb i j hij) (dropPairOfMap i j hij σ hσ.1)  := by
+      (c1 ∘ dropPairEmb i j hij) (dropPairOfMap i j hij σ hσ.1) := by
   apply And.intro
   · exact dropPairOfMap_bijective i j hij σ hσ.left
   · intro m
@@ -315,7 +313,7 @@ lemma dropPair_update_fst {n : ℕ} [inst : DecidableEq (Fin (n + 1 +1))] {c : F
   exact Ne.symm (fst_neq_dropPairEmb_pre i j hij m)
 
 @[simp]
-lemma dropPair_update_snd {n : ℕ}  [inst : DecidableEq (Fin (n + 1 +1))] {c : Fin (n + 1 + 1) → S.C}
+lemma dropPair_update_snd {n : ℕ} [inst : DecidableEq (Fin (n + 1 +1))] {c : Fin (n + 1 + 1) → S.C}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j) (p : Pure S c)
     (x : S.FD.obj (Discrete.mk (c j))) :
     dropPair i j hij (p.update j x) = dropPair i j hij p := by
@@ -324,7 +322,8 @@ lemma dropPair_update_snd {n : ℕ}  [inst : DecidableEq (Fin (n + 1 +1))] {c : 
   conv_rhs => rw [dropPair_symm]
 
 @[simp]
-lemma dropPair_update_dropPairEmb {n : ℕ} [inst : DecidableEq (Fin (n + 1 +1))] {c : Fin (n + 1 + 1) → S.C}
+lemma dropPair_update_dropPairEmb {n : ℕ} [inst : DecidableEq (Fin (n + 1 +1))]
+    {c : Fin (n + 1 + 1) → S.C}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j) (p : Pure S c)
     (m : Fin n)
     (x : S.FD.obj (Discrete.mk (c (dropPairEmb i j hij m)))) :
@@ -341,7 +340,6 @@ lemma dropPair_update_dropPairEmb {n : ℕ} [inst : DecidableEq (Fin (n + 1 +1))
     · simp [h]
 
 TODO "Prove lemmas relating to the commutation rules of `dropPair` and `prodP`."
-
 
 @[simp]
 lemma dropPair_permP {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
@@ -374,7 +372,7 @@ lemma contrPCoeff_permP {n n1 : ℕ} {c : Fin n → S.C}
     contrPCoeff i j hij (permP σ hσ p) =
     contrPCoeff (σ i) (σ j) (by simp [hσ.1.injective.eq_iff, hij, hσ.2]) p := by
   simp [contrPCoeff, permP]
-  conv_rhs => erw [S.contr_congr (c (σ i)) ((c1 i)) (by simp [hσ.2]) ]
+  conv_rhs => erw [S.contr_congr (c (σ i)) ((c1 i)) (by simp [hσ.2])]
   simp
   apply congrArg
   congr 1
@@ -383,9 +381,9 @@ lemma contrPCoeff_permP {n n1 : ℕ} {c : Fin n → S.C}
   rw [← Functor.map_comp, ← Functor.map_comp]
   simp
 
-
 @[simp]
-lemma contrPCoeff_update_dropPairEmb {n : ℕ} [inst : DecidableEq (Fin (n + 1 +1))]  {c : Fin (n + 1 + 1) → S.C}
+lemma contrPCoeff_update_dropPairEmb {n : ℕ} [inst : DecidableEq (Fin (n + 1 +1))]
+    {c : Fin (n + 1 + 1) → S.C}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ c i = S.τ (c j)) (m : Fin n)
     (p : Pure S c) (x : S.FD.obj (Discrete.mk (c (dropPairEmb i j hij.1 m)))) :
     contrPCoeff i j hij (p.update (dropPairEmb i j hij.1 m) x) =
@@ -396,7 +394,7 @@ lemma contrPCoeff_update_dropPairEmb {n : ℕ} [inst : DecidableEq (Fin (n + 1 +
   · simp [update]
 
 @[simp]
-lemma contrPCoeff_update_fst_add {n : ℕ} [inst : DecidableEq (Fin n)]  {c : Fin n → S.C}
+lemma contrPCoeff_update_fst_add {n : ℕ} [inst : DecidableEq (Fin n)] {c : Fin n → S.C}
     (i j : Fin n) (hij : i ≠ j ∧ c i = S.τ (c j))
     (p : Pure S c) (x y : S.FD.obj (Discrete.mk (c i))) :
     contrPCoeff i j hij (p.update i (x + y)) =
@@ -423,7 +421,7 @@ lemma contrPCoeff_update_snd_add {n : ℕ} [inst : DecidableEq (Fin n)] {c : Fin
   rfl
 
 @[simp]
-lemma contrPCoeff_update_fst_smul {n : ℕ} [inst : DecidableEq (Fin n)]  {c : Fin n → S.C}
+lemma contrPCoeff_update_fst_smul {n : ℕ} [inst : DecidableEq (Fin n)] {c : Fin n → S.C}
     (i j : Fin n) (hij : i ≠ j ∧ c i = S.τ (c j))
     (p : Pure S c) (r : k) (x : S.FD.obj (Discrete.mk (c i))) :
     contrPCoeff i j hij (p.update i (r • x)) =
@@ -436,13 +434,13 @@ lemma contrPCoeff_update_fst_smul {n : ℕ} [inst : DecidableEq (Fin n)]  {c : F
   rw [Function.update_of_ne (Ne.symm hij.1), Function.update_of_ne (Ne.symm hij.1)]
 
 @[simp]
-lemma contrPCoeff_update_snd_smul {n : ℕ} [inst : DecidableEq (Fin n)]  {c : Fin n → S.C}
+lemma contrPCoeff_update_snd_smul {n : ℕ} [inst : DecidableEq (Fin n)] {c : Fin n → S.C}
     (i j : Fin n) (hij : i ≠ j ∧ c i = S.τ (c j))
     (p : Pure S c) (r : k) (x : S.FD.obj (Discrete.mk (c j))) :
     contrPCoeff i j hij (p.update j (r • x)) =
     r * contrPCoeff i j hij (p.update j x) := by
   simp [contrPCoeff, update, TensorProduct.add_tmul, map_add]
-  change ((S.contr.app { as := c i })).hom.hom' _ =  r * _
+  change ((S.contr.app { as := c i })).hom.hom' _ = r * _
   rw [Function.update_of_ne hij.1, Function.update_of_ne hij.1]
   conv_lhs =>
     enter [2, 3]
@@ -451,17 +449,18 @@ lemma contrPCoeff_update_snd_smul {n : ℕ} [inst : DecidableEq (Fin n)]  {c : F
   rfl
 
 lemma contrPCoeff_dropPair {n : ℕ} {c : Fin (n + 1 + 1) → S.C}
-     (a b : Fin (n + 1 + 1 )) (hab : a ≠ b)
+    (a b : Fin (n + 1 + 1)) (hab : a ≠ b)
     (i j : Fin n) (hij : i ≠ j ∧ c (dropPairEmb a b hab i) = S.τ (c (dropPairEmb a b hab j)))
     (p : Pure S c) : (p.dropPair a b hab).contrPCoeff i j hij =
     p.contrPCoeff (dropPairEmb a b hab i) (dropPairEmb a b hab j)
       (by simpa using hij) := by rfl
 
-lemma contrPCoeff_symm {n : ℕ} {c : Fin n → S.C} {i j : Fin n} {hij : i ≠ j ∧ c i = S.τ (c j)} {p : Pure S c} :
+lemma contrPCoeff_symm {n : ℕ} {c : Fin n → S.C} {i j : Fin n} {hij : i ≠ j ∧ c i = S.τ (c j)}
+    {p : Pure S c} :
     p.contrPCoeff i j hij = p.contrPCoeff j i ⟨hij.1.symm, by simp [hij]⟩ := by
   rw [contrPCoeff, contrPCoeff]
   erw [S.contr_tmul_symm]
-  rw [S.contr_congr (S.τ (c i)) (c j) ]
+  rw [S.contr_congr (S.τ (c i)) (c j)]
   simp only [Monoidal.tensorUnit_obj, Action.instMonoidalCategory_tensorUnit_V,
     Equivalence.symm_inverse, Action.functorCategoryEquivalence_functor,
     Action.FunctorCategoryEquivalence.functor_obj_obj, Functor.comp_obj, Discrete.functor_obj_eq_as,
@@ -471,7 +470,7 @@ lemma contrPCoeff_symm {n : ℕ} {c : Fin n → S.C} {i j : Fin n} {hij : i ≠ 
   · change ((S.FD.map (eqToHom _) ≫ S.FD.map (eqToHom _)).hom) _ = _
     rw [← S.FD.map_comp]
     simp
-  · change ( (S.FD.map (eqToHom _) ≫ S.FD.map (eqToHom _)).hom) _ = _
+  · change ((S.FD.map (eqToHom _) ≫ S.FD.map (eqToHom _)).hom) _ = _
     rw [← S.FD.map_comp]
     simp
     rfl
@@ -487,9 +486,10 @@ lemma contrPCoeff_mul_dropPair {n : ℕ} {c : Fin (n + 1 + 1 + 1 + 1) → S.C}
     have hi2j2' : i2' ≠ j2' := by simp [i2', j2', dropPairEmb, hij2];
     let i1' := (dropPairEmbPre i2' j2' hi2j2' i1 (by simp [i2', j2']));
     let j1' := (dropPairEmbPre i2' j2' hi2j2' j1 (by simp [i2', j2']));
-    (p.contrPCoeff i1 j1 hij1) * (dropPair i1 j1 hij1.1 p).contrPCoeff i2 j2 hij2  =
+    (p.contrPCoeff i1 j1 hij1) * (dropPair i1 j1 hij1.1 p).contrPCoeff i2 j2 hij2 =
     (p.contrPCoeff i2' j2' (by simp [i2', j2', hij2])) *
-    (dropPair i2' j2' (by simp [i2', j2', hij2]) p).contrPCoeff i1' j1' (by simp [i1', j1', hij1]) := by
+    (dropPair i2' j2' (by simp [i2', j2', hij2]) p).contrPCoeff i1' j1'
+      (by simp [i1', j1', hij1]) := by
   simp only [ne_eq, contrPCoeff_dropPair, dropPairEmb_dropPairEmbPre]
   rw [mul_comm]
 
@@ -498,7 +498,7 @@ lemma contrPCoeff_invariant {n : ℕ} {c : Fin n → S.C} {i j : Fin n}
     {hij : i ≠ j ∧ c i = S.τ (c j)} {p : Pure S c}
     (g : S.G) : (g • p).contrPCoeff i j hij = p.contrPCoeff i j hij := by
   calc (g • p).contrPCoeff i j hij
-    _ =  (S.contr.app (Discrete.mk (c i)))
+    _ = (S.contr.app (Discrete.mk (c i)))
           ((S.FD.obj _).ρ g (p i) ⊗ₜ ((S.FD.map (eqToHom (by simp [hij])))
           ((S.FD.obj _).ρ g (p j)))) := rfl
     _ = (S.contr.app (Discrete.mk (c i)))
@@ -514,7 +514,7 @@ lemma contrPCoeff_invariant {n : ℕ} {c : Fin n → S.C} {i j : Fin n}
         simp at h2
         exact h2
   have h1 := (S.contr.app (Discrete.mk (c i))).comm g
-  have h2 := congrFun (congrArg (fun x => x.hom) h1) ( (p i) ⊗ₜ
+  have h2 := congrFun (congrArg (fun x => x.hom) h1) ((p i) ⊗ₜ
     ((S.FD.map (eqToHom (by simp [hij]))) (p j)))
   simp at h2
   exact h2
@@ -542,7 +542,7 @@ lemma contrP_update_add {n : ℕ} [inst : DecidableEq (Fin (n + 1 +1))] {c : Fin
   · simp [contrP]
 
 @[simp]
-lemma contrP_update_smul {n : ℕ} [inst : DecidableEq (Fin (n + 1 +1))]  {c : Fin (n + 1 + 1) → S.C}
+lemma contrP_update_smul {n : ℕ} [inst : DecidableEq (Fin (n + 1 +1))] {c : Fin (n + 1 + 1) → S.C}
     (i j m : Fin (n + 1 + 1)) (hij : i ≠ j ∧ c i = S.τ (c j))
     (p : Pure S c) (r : k) (x : S.FD.obj (Discrete.mk (c m))) :
     contrP i j hij (p.update m (r • x)) =
@@ -575,7 +575,7 @@ noncomputable def contrPMultilinear {n : ℕ} {c : Fin (n + 1 + 1) → S.C}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ c i = S.τ (c j)) :
     MultilinearMap k (fun i => S.FD.obj (Discrete.mk (c i)))
       (S.Tensor (c ∘ dropPairEmb i j hij.1))where
-  toFun p :=  contrP i j hij p
+  toFun p := contrP i j hij p
   map_update_add' p m x y := by
     change (update p m (x + y)).contrP i j hij = _
     simp
@@ -585,9 +585,7 @@ noncomputable def contrPMultilinear {n : ℕ} {c : Fin (n + 1 + 1) → S.C}
     rw [Pure.contrP_update_smul]
     rfl
 
-
 end Pure
-
 
 /-!
 
@@ -687,8 +685,10 @@ lemma contrT_comm {n : ℕ} {c : Fin (n + 1 + 1 + 1 + 1) → S.C}
         (contrT i2' j2' (by simp [i2', j2', hij2]) t)) := by
   let i2' := (dropPairEmb i1 j1 hij1.1 i2);
   let j2' := (dropPairEmb i1 j1 hij1.1 j2);
-  let i1' := (dropPairEmbPre i2' j2' (by simp [i2', j2', dropPairEmb, hij2]) i1 (by simp [i2', j2']));
-  let j1' := (dropPairEmbPre i2' j2' (by simp [i2', j2', dropPairEmb, hij2])  j1 (by simp [i2', j2']));
+  let i1' := (dropPairEmbPre i2' j2' (by simp [i2', j2', dropPairEmb, hij2]) i1
+    (by simp [i2', j2']));
+  let j1' := (dropPairEmbPre i2' j2' (by simp [i2', j2', dropPairEmb, hij2]) j1
+    (by simp [i2', j2']));
   let P (t : Tensor S c) : Prop := contrT i2 j2 hij2 (contrT i1 j1 hij1 t) =
       permT id (permCond_dropPairEmb_comm i1 j1 i2 j2 hij1.left hij2.left)
         (contrT i1' j1' (by simp [i1', j1', i2', j2', hij1])
@@ -723,24 +723,21 @@ lemma contrT_comm {n : ℕ} {c : Fin (n + 1 + 1 + 1 + 1) → S.C}
     conv_rhs => enter [2]; rw [map_add]
     conv_rhs => rw [map_add]
 
-
 /-!
 
 ## Products and contractions
 
 -/
 
-
 lemma Pure.dropPairEmb_succAbove {n : ℕ}
     (i : Fin (n + 1 + 1)) (j : Fin (n + 1)) :
     dropPairEmb i (i.succAbove j) (Fin.ne_succAbove i j) =
     i.succAbove ∘ j.succAbove := by
-  let f :  Fin n ↪o Fin (n + 1 + 1) :=
-    ⟨⟨i.succAboveOrderEmb ∘ j.succAboveOrderEmb , by
+  let f : Fin n ↪o Fin (n + 1 + 1) :=
+    ⟨⟨i.succAboveOrderEmb ∘ j.succAboveOrderEmb, by
       refine Function.Injective.comp ?_ ?_
       exact Fin.succAbove_right_injective
-      exact Fin.succAbove_right_injective
-      ⟩, by
+      exact Fin.succAbove_right_injective⟩, by
       simp only [Function.Embedding.coeFn_mk, Function.comp_apply, OrderEmbedding.le_iff_le,
         implies_true]⟩
   have hf : dropPairEmb i (i.succAbove j) (Fin.ne_succAbove i j) = f := by
@@ -766,18 +763,16 @@ lemma Pure.dropPairEmb_succAbove {n : ℕ}
       simp_all
       exact Fin.succAbove_ne i a
   ext a
-  have hf' := congrFun (congrArg (fun x => x.toFun) hf ) a
+  have hf' := congrFun (congrArg (fun x => x.toFun) hf) a
   simp [f] at hf'
   rw [hf']
   rfl
 
-
-
-lemma Pure.dropPairEmb_apply_lt_lt  {n : ℕ}
+lemma Pure.dropPairEmb_apply_lt_lt {n : ℕ}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j)
     (m : Fin n) (hi : m.val < i.val) (hj : m.val < j.val) :
     dropPairEmb i j hij m = m.castSucc.castSucc := by
-  rcases  Fin.eq_self_or_eq_succAbove i j  with hj' | hj'
+  rcases Fin.eq_self_or_eq_succAbove i j with hj' | hj'
   · subst hj'
     simp at hij
   obtain ⟨j, rfl⟩ := hj'
@@ -795,7 +790,6 @@ lemma Pure.dropPairEmb_apply_lt_lt  {n : ℕ}
   · simp_all [Fin.lt_def, Fin.le_def, Fin.succAbove]
     omega
 
-
 lemma Pure.dropPairEmb_natAdd_apply_castAdd {n n1 : ℕ}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j)
     (m : Fin n1) :
@@ -809,22 +803,13 @@ lemma Pure.dropPairEmb_natAdd_apply_castAdd {n n1 : ℕ}
   · simp
     omega
 
-
 lemma Pure.dropPairEmb_natAdd_image_range_castAdd {n n1 : ℕ}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j) :
-    (dropPairEmb (n := n1 + n) (Fin.natAdd n1 i) (Fin.natAdd n1 j) (by simp_all [Fin.ne_iff_vne])) ''
+    (dropPairEmb (n := n1 + n) (Fin.natAdd n1 i) (Fin.natAdd n1 j)
+    (by simp_all [Fin.ne_iff_vne])) ''
     (Set.range (Fin.castAdd (m := n) (n := n1))) = {i | i.1 < n1} := by
-  have hcastRange : Set.range (Fin.castAdd (m := n) (n := n1))  = {i | i.1 < n1} := by
-    rw [@Set.range_eq_iff]
-    apply And.intro
-    · intro a
-      simp
-    · intro b hb
-      simp at hb
-      use ⟨b, by omega⟩
-      simp [Fin.ext_iff]
   ext a
-  simp
+  simp only [Set.mem_image, Set.mem_range, exists_exists_eq_and, Set.mem_setOf_eq]
   conv_lhs =>
     enter [1, b]
     rw [dropPairEmb_natAdd_apply_castAdd i j hij]
@@ -842,9 +827,9 @@ lemma Pure.dropPairEmb_comm_natAdd {n n1 : ℕ}
     (dropPairEmb (n := n1 + n) (Fin.natAdd n1 i) (Fin.natAdd n1 j) (by simp_all [Fin.ne_iff_vne]))
     (Fin.natAdd n1 m)
     = Fin.natAdd (n1) (dropPairEmb i j hij m) := by
-  let f : Fin n ↪o  Fin (n1 + n + 1 + 1) :=
+  let f : Fin n ↪o Fin (n1 + n + 1 + 1) :=
     ⟨⟨(dropPairEmb (Fin.natAdd n1 i) (Fin.natAdd n1 j) (by simp_all [Fin.ne_iff_vne]))
-    ∘ Fin.natAdd n1 , by
+    ∘ Fin.natAdd n1, by
       simp
       intro i j
       simp [Fin.ext_iff]⟩, by
@@ -852,7 +837,7 @@ lemma Pure.dropPairEmb_comm_natAdd {n n1 : ℕ}
       simp
       rw [Fin.le_def, Fin.le_def]
       simp⟩
-  let g : Fin n ↪o  Fin (n1 + n + 1 + 1) :=
+  let g : Fin n ↪o Fin (n1 + n + 1 + 1) :=
       ⟨⟨(Fin.natAdd (n1) ∘ dropPairEmb i j hij), by
       intro a b
       simp [Fin.ext_iff]
@@ -861,7 +846,7 @@ lemma Pure.dropPairEmb_comm_natAdd {n n1 : ℕ}
       simp
       rw [Fin.le_def, Fin.le_def]
       simp⟩
-  have hcastRange : Set.range (Fin.castAdd (m := n) (n := n1))  = {i | i.1 < n1} := by
+  have hcastRange : Set.range (Fin.castAdd (m := n) (n := n1)) = {i | i.1 < n1} := by
     rw [@Set.range_eq_iff]
     apply And.intro
     · intro a
@@ -870,7 +855,8 @@ lemma Pure.dropPairEmb_comm_natAdd {n n1 : ℕ}
       simp at hb
       use ⟨b, by omega⟩
       simp [Fin.ext_iff]
-  have hnatRange : Set.range (Fin.natAdd (m := n) n1) = (Set.range (Fin.castAdd (m := n) (n := n1)) )ᶜ:= by
+  have hnatRange : Set.range (Fin.natAdd (m := n) n1) =
+    (Set.range (Fin.castAdd (m := n) (n := n1)))ᶜ := by
     rw [hcastRange]
     rw [@Set.range_eq_iff]
     apply And.intro
@@ -900,7 +886,7 @@ lemma Pure.dropPairEmb_comm_natAdd {n n1 : ℕ}
     · intro h
       obtain ⟨x, h1, rfl⟩ := h
       simp_all [Fin.ext_iff]
-  simpa using  congrFun (congrArg (fun x => x.toFun) hfg ) m
+  simpa using congrFun (congrArg (fun x => x.toFun) hfg) m
 
 lemma Pure.dropPairEmb_permCond_prod {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
     {c1 : Fin n1 → S.C}
@@ -933,17 +919,18 @@ lemma Pure.contrPCoeff_natAdd {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ c i = S.τ (c j))
     (p : Pure S c) (p1 : Pure S c1) :
     contrPCoeff (Fin.natAdd n1 i) (Fin.natAdd n1 j)
-    (by simp_all [Fin.ext_iff])  (p1.prodP p)
+    (by simp_all [Fin.ext_iff]) (p1.prodP p)
     = contrPCoeff i j hij p := by
   simp [contrPCoeff]
-  conv_lhs => erw [S.contr_congr ((Sum.elim c1 c (finSumFinEquiv.symm (Fin.natAdd n1 i)))) ((c i)) (by simp ) ]
+  conv_lhs => erw [S.contr_congr
+    ((Sum.elim c1 c (finSumFinEquiv.symm (Fin.natAdd n1 i)))) ((c i)) (by simp)]
   apply congrArg
   congr 1
-  · change  (ConcreteCategory.hom (S.FD.map (Discrete.eqToHom _)))
+  · change (ConcreteCategory.hom (S.FD.map (Discrete.eqToHom _)))
       ((ConcreteCategory.hom (S.FD.map (eqToHom _))) (p i)) = _
     simp [map_map_apply]
-  · change  (ConcreteCategory.hom (S.FD.map (Discrete.eqToHom _)))
-      ((ConcreteCategory.hom (S.FD.map (eqToHom _))) (_)) = _
+  · change (ConcreteCategory.hom (S.FD.map (Discrete.eqToHom _)))
+      ((ConcreteCategory.hom (S.FD.map (eqToHom _))) _) = _
     simp [map_map_apply]
 
 @[simp]
@@ -952,17 +939,17 @@ lemma Pure.contrPCoeff_castAdd {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ c i = S.τ (c j))
     (p : Pure S c) (p1 : Pure S c1) :
     contrPCoeff (Fin.castAdd n1 i) (Fin.castAdd n1 j)
-    (by simp_all [Fin.ext_iff])  (p.prodP p1)
+    (by simp_all [Fin.ext_iff]) (p.prodP p1)
     = contrPCoeff i j hij p := by
   simp [contrPCoeff]
   conv_lhs => erw [S.contr_congr _ ((c i)) (by simp)]
   apply congrArg
   congr 1
-  · change  (ConcreteCategory.hom (S.FD.map (Discrete.eqToHom _)))
+  · change (ConcreteCategory.hom (S.FD.map (Discrete.eqToHom _)))
       ((ConcreteCategory.hom (S.FD.map (eqToHom _))) (p i)) = _
     simp [map_map_apply]
-  · change  (ConcreteCategory.hom (S.FD.map (Discrete.eqToHom _)))
-      ((ConcreteCategory.hom (S.FD.map (eqToHom _))) (_)) = _
+  · change (ConcreteCategory.hom (S.FD.map (Discrete.eqToHom _)))
+      ((ConcreteCategory.hom (S.FD.map (eqToHom _))) _) = _
     simp [map_map_apply]
 
 lemma Pure.prodP_dropPair {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
@@ -971,7 +958,7 @@ lemma Pure.prodP_dropPair {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
     (p : Pure S c) (p1 : Pure S c1) :
     p1.prodP (dropPair i j hij.1 p) = permP id (Pure.dropPairEmb_permCond_prod i j hij)
     (dropPair (Fin.natAdd n1 i) (Fin.natAdd n1 j)
-    (by simp_all [Fin.ext_iff] ) (p1.prodP p)) := by
+    (by simp_all [Fin.ext_iff]) (p1.prodP p)) := by
   ext x
   obtain ⟨x, rfl⟩ := finSumFinEquiv.surjective x
   rw [prodP_apply_finSumFinEquiv]
