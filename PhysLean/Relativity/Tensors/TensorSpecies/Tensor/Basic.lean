@@ -56,7 +56,7 @@ lemma congr_mid {n : ℕ} {c : Fin n → S.C} (c' : S.C) (p : Pure S c)
     S.FD.map (eqToHom (by rw [hi] : { as := c i } = { as := c' })) (p i) =
     S.FD.map (eqToHom (by rw [hj] : { as := c j } = { as := c' })) (p j) := by
   subst hi
-  simp
+  simp only [eqToHom_refl, Discrete.functor_map_id, ConcreteCategory.id_apply]
   symm
   apply congr_right
   exact h
@@ -104,13 +104,13 @@ lemma update_succAbove_drop {n : ℕ} {c : Fin (n + 1) → S.C} [inst : Decidabl
     (p : Pure S c) (i : Fin (n + 1)) (k : Fin n) (x : S.FD.obj (Discrete.mk (c (i.succAbove k)))) :
     (update p (i.succAbove k) x).drop i = (p.drop i).update k x := by
   ext j
-  simp [update, drop]
+  simp only [Function.comp_apply, drop, update]
   by_cases h : j = k
   · subst h
     simp
   · rw [Function.update_of_ne h, Function.update_of_ne]
     · rfl
-    · simp
+    · simp only [ne_eq]
       rw [Function.Injective.eq_iff (Fin.succAbove_right_injective (p := i))]
       exact h
 
@@ -119,7 +119,7 @@ lemma update_drop_self {n : ℕ} {c : Fin (n + 1) → S.C} [inst : DecidableEq (
     (p : Pure S c) (i : Fin (n + 1)) (x : S.FD.obj (Discrete.mk (c i))) :
     (update p i x).drop i = p.drop i := by
   ext k
-  simp [update, drop]
+  simp only [Function.comp_apply, drop, update]
   rw [Function.update_of_ne]
   exact Fin.succAbove_ne i k
 
@@ -136,7 +136,7 @@ lemma μ_toTensor_tmul_toTensor {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.
   rw [LinearEquiv.trans_apply]
   rw [toTensor, toTensor]
   rw [PhysLean.PiTensorProduct.tmulEquiv_tmul_tprod]
-  simp
+  simp only [PiTensorProduct.congr_tprod]
   congr
   funext i
   match i with
@@ -278,7 +278,7 @@ lemma componentMap_ofComponents {n : ℕ} (c : Fin n → S.C) (f : ComponentIdx 
 @[simp]
 lemma ofComponents_componentMap {n : ℕ} (c : Fin n → S.C) (t : S.Tensor c) :
     ofComponents c (componentMap c t) = t := by
-  simp [ofComponents, LinearMap.comp_apply, PiTensorProduct.lift_tprod]
+  simp only [ofComponents, LinearMap.coe_mk, AddHom.coe_mk]
   apply induction_on_pure ?_ ?_ ?_ t
   · intro p
     simp only [componentMap_pure, Pure.componentMap_apply]
@@ -313,7 +313,8 @@ def basis {n : ℕ} (c : Fin n → S.C) : Basis (ComponentIdx c) k (S.Tensor c) 
 lemma basis_apply {n : ℕ} (c : Fin n → S.C) (b : ComponentIdx c) :
     basis c b = (Pure.basisVector c b).toTensor := by
   change ofComponents c _ = _
-  simp [ofComponents]
+  simp only [ofComponents, LinearEquiv.coe_toEquiv_symm, LinearEquiv.symm_symm, EquivLike.coe_coe,
+    Finsupp.linearEquivFunOnFinite_single, LinearMap.coe_mk, AddHom.coe_mk]
   rw [Finset.sum_eq_single b]
   · simp
   · intro b' _ hb
@@ -386,7 +387,7 @@ lemma actionT_eq {g : S.G} {t : S.Tensor c} : g • t = (S.F.obj (OverColor.mk c
 lemma actionT_pure {g : S.G} {p : Pure S c} :
     g • p.toTensor = Pure.toTensor (g • p) := by
   rw [actionT_eq, Pure.toTensor]
-  simp [F_def, lift, lift.obj']
+  simp only [F_def, lift, lift.obj', LaxBraidedFunctor.of_toFunctor]
   rw [OverColor.lift.objObj'_ρ_tprod]
   rfl
 
@@ -482,7 +483,7 @@ lemma Pure.permP_basisVector {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C
       Pure.permP σ h (Pure.basisVector c b) =
       Pure.basisVector c1 (fun i => Fin.cast (by simp [h.preserve_color]) (b (σ i))) := by
   ext i
-  simp [permP, Pure.basisVector]
+  simp only [permP, basisVector]
   have h1 {c1 c2 : S.C} (h : c1 = c2) (x : Fin (S.repDim c1)) :
       S.FD.map (eqToHom (by simp [h])) ((S.basis (c1)) x) =
       (S.basis c2) (Fin.cast (by simp [h]) x) := by
@@ -510,7 +511,7 @@ lemma permT_pure {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
 lemma permT_equivariant {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
       {σ : Fin m → Fin n} (h : PermCond c c1 σ) (g : S.G) (t : S.Tensor c) :
       permT σ h (g • t) = g • permT σ h t := by
-  simp [permT, actionT_eq]
+  simp only [permT, actionT_eq, LinearMap.coe_mk, AddHom.coe_mk]
   exact Rep.hom_comm_apply (S.F.map h.toHom) g t
 
 @[congr]
@@ -546,7 +547,7 @@ lemma permT_permT {n m1 m2 : ℕ} {c : Fin n → S.C} {c1 : Fin m1 → S.C} {c2 
   change P t
   apply induction_on_basis
   · intro b
-    simp [P]
+    simp only [P]
     rw [basis_apply, permT_pure, permT_pure, permT_pure]
     simp
   · simp [P]
@@ -676,7 +677,7 @@ lemma prodEquiv_symm_pure {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
   change (S.F.map (OverColor.equivToIso finSumFinEquiv).inv).hom p.toTensor = _
   rw [Pure.toTensor]
   have h1 := OverColor.lift.map_tprod S.FD (equivToIso finSumFinEquiv).inv p
-  simp [F_def]
+  simp only [F_def]
   rw (transparency := .instances) [h1]
   rfl
 
@@ -702,10 +703,11 @@ lemma prodT_pure {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
     rw [Pure.μ_toTensor_tmul_toTensor]
   change prodEquiv.toEquiv _ = _
   rw [Equiv.apply_eq_iff_eq_symm_apply]
-  simp
+  simp only [instMonoidalCategoryStruct_tensorObj_left, instMonoidalCategoryStruct_tensorObj_hom,
+    Functor.id_obj, LinearEquiv.coe_toEquiv_symm, EquivLike.coe_coe]
   rw [prodEquiv_symm_pure]
   congr
-  simp [Pure.prodP]
+  simp only [Pure.prodP, Equiv.apply_symm_apply]
   ext i
   match i with
   | Sum.inl i =>
@@ -745,7 +747,7 @@ lemma prodAssocMap_castAdd_natAdd {n1 n2 n3 : ℕ} (i : Fin n2) :
 lemma prodAssocMap_natAdd {n1 n2 n3 : ℕ} (i : Fin (n3)) :
     prodAssocMap n1 n2 n3 (Fin.natAdd (n1 + n2) i) =
     finSumFinEquiv (Sum.inr (finSumFinEquiv (Sum.inr i))) := by
-  simp [prodAssocMap, Fin.castAdd, Fin.ext_iff]
+  simp only [prodAssocMap, finSumFinEquiv_apply_right, Fin.ext_iff, Fin.coe_cast, Fin.coe_natAdd]
   omega
 
 def prodAssocMap' (n1 n2 n3 : ℕ) : Fin (n1 + (n2 + n3)) → Fin (n1 + n2 + n3) :=
@@ -767,7 +769,7 @@ lemma prodAssocMap'_natAdd_castAdd {n1 n2 n3 : ℕ} (i : Fin n2) :
 lemma prodAssocMap'_natAdd_natAdd {n1 n2 n3 : ℕ} (i : Fin n3) :
     prodAssocMap' n1 n2 n3 (Fin.natAdd n1 (Fin.natAdd n2 i)) =
     finSumFinEquiv (Sum.inr i) := by
-  simp [prodAssocMap', Fin.castAdd, Fin.ext_iff]
+  simp only [prodAssocMap', finSumFinEquiv_apply_right, Fin.ext_iff, Fin.coe_cast, Fin.coe_natAdd]
   omega
 
 def prodSwapMap (n1 n2 : ℕ) : Fin (n1 + n2) → Fin (n2 + n1) :=
@@ -787,7 +789,7 @@ lemma prodLeftMap_permCond {σ : Fin n' → Fin n} (c2 : Fin n2 → S.C) (h : Pe
     · exact Function.bijective_id
   · intro i
     obtain ⟨i, rfl⟩ := finSumFinEquiv.surjective i
-    simp [prodLeftMap]
+    simp only [prodLeftMap, Function.comp_apply, Equiv.symm_apply_apply]
     match i with
     | Sum.inl i => simp [h.2]
     | Sum.inr i => rfl
@@ -806,7 +808,7 @@ lemma prodRightMap_permCond {σ : Fin n' → Fin n} (c2 : Fin n2 → S.C) (h : P
     · exact h.1
   · intro i
     obtain ⟨i, rfl⟩ := finSumFinEquiv.surjective i
-    simp [prodRightMap]
+    simp only [prodRightMap, Function.comp_apply, Equiv.symm_apply_apply]
     match i with
     | Sum.inl i => rfl
     | Sum.inr i => simp [h.2]
@@ -816,13 +818,13 @@ lemma prodSwapMap_permCond {n1 n2 : ℕ} {c : Fin n1 → S.C} {c2 : Fin n2 → S
     PermCond (Sum.elim c c2 ∘ finSumFinEquiv.symm)
       (Sum.elim c2 c ∘ finSumFinEquiv.symm) (prodSwapMap n2 n1) := by
   apply And.intro
-  · dsimp [prodSwapMap]
+  · dsimp only [prodSwapMap]
     refine (Equiv.comp_bijective (Sum.swap ∘ ⇑finSumFinEquiv.symm) finSumFinEquiv).mpr ?_
     refine (Equiv.bijective_comp finSumFinEquiv.symm Sum.swap).mpr ?_
     exact Function.bijective_iff_has_inverse.mpr ⟨Sum.swap, by simp⟩
   · intro i
     obtain ⟨i, rfl⟩ := finSumFinEquiv.surjective i
-    simp [prodSwapMap]
+    simp only [prodSwapMap, Function.comp_apply, Equiv.symm_apply_apply]
     match i with
     | Sum.inl i => rfl
     | Sum.inr i => rfl
@@ -857,7 +859,7 @@ lemma prodAssocMap_permCond {n1 n2 n3 : ℕ} {c : Fin n1 → S.C} {c2 : Fin n2 �
     | Sum.inr i =>
       suffices Fin.cast (Nat.add_assoc n1 n2 n3) (finSumFinEquiv (Sum.inr i)) =
           finSumFinEquiv (Sum.inr (finSumFinEquiv (Sum.inr i))) by {rw [this]; simp}
-      simp [Fin.ext_iff]
+      simp only [finSumFinEquiv_apply_right, Fin.ext_iff, Fin.coe_cast, Fin.coe_natAdd]
       exact Nat.add_assoc n1 n2 ↑i
 
 @[simp]
@@ -890,7 +892,7 @@ lemma prodAssocMap'_permCond {n1 n2 n3 : ℕ} {c : Fin n1 → S.C} {c2 : Fin n2 
         suffices (Fin.cast (Nat.add_assoc n1 n2 n3).symm
           (finSumFinEquiv (Sum.inr (finSumFinEquiv (Sum.inr i)))))
           = (finSumFinEquiv (Sum.inr i)) by {rw [this]; simp}
-        simp [Fin.ext_iff]
+        simp only [finSumFinEquiv_apply_right, Fin.ext_iff, Fin.coe_cast, Fin.coe_natAdd]
         exact Eq.symm (Nat.add_assoc n1 n2 ↑i)
 
 /-!
@@ -914,14 +916,14 @@ lemma Pure.prodP_equivariant {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
     generalize_proofs h
     have h1 := (S.FD.map (eqToHom h)).comm g
     have h1' := congrFun (congrArg (fun x => x.hom) h1) (p i)
-    simp at h1'
+    simp only [Function.comp_apply, ModuleCat.hom_comp, Rep.ρ_hom, LinearMap.coe_comp] at h1'
     exact h1'
   | Sum.inr i =>
     simp only [finSumFinEquiv_apply_right, prodP_apply_natAdd]
     generalize_proofs h
     have h1 := (S.FD.map (eqToHom h)).comm g
     have h1' := congrFun (congrArg (fun x => x.hom) h1) (p1 i)
-    simp at h1'
+    simp only [Function.comp_apply, ModuleCat.hom_comp, Rep.ρ_hom, LinearMap.coe_comp] at h1'
     exact h1'
 
 @[simp]
@@ -936,7 +938,7 @@ lemma prodT_equivariant {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
     change P t1
     apply induction_on_pure
     · intro q
-      simp [P]
+      simp only [P]
       rw [prodT_pure, actionT_pure, actionT_pure, prodT_pure, actionT_pure]
       simp
     · intro r t h1
@@ -956,11 +958,11 @@ lemma Pure.prodP_swap {n n1} {c : Fin n → S.C}
   obtain ⟨i, rfl⟩ := finSumFinEquiv.surjective i
   match i with
   | Sum.inl i =>
-    simp [prodP_apply_castAdd, permP]
+    simp only [finSumFinEquiv_apply_left, Function.comp_apply, prodP_apply_castAdd, permP]
     rw [← congr_right (p1.prodP p) _ (Fin.natAdd n1 i) (by simp [prodSwapMap])]
     simp [map_map_apply]
   | Sum.inr i =>
-    simp [prodP_apply_natAdd, permP]
+    simp only [finSumFinEquiv_apply_right, Function.comp_apply, prodP_apply_natAdd, permP]
     rw [← congr_right (p1.prodP p) _ (Fin.castAdd n i) (by simp [prodSwapMap])]
     simp [map_map_apply]
 
@@ -978,7 +980,7 @@ lemma prodT_swap {n n1} {c : Fin n → S.C}
     change P t1
     apply induction_on_pure
     · intro q
-      simp [P]
+      simp only [P]
       rw [prodT_pure, prodT_pure, permT_pure, Pure.prodP_swap]
     · intro r t h1
       simp_all only [map_smul, LinearMap.smul_apply, P]
@@ -1031,7 +1033,7 @@ lemma prodT_permT_left {n n'} {c : Fin n → S.C} {c' : Fin n' → S.C}
     change P t2
     apply induction_on_pure
     · intro q
-      simp [P]
+      simp only [P]
       rw [prodT_pure, permT_pure, permT_pure, prodT_pure]
       congr
       simp
@@ -1051,11 +1053,11 @@ lemma Pure.prodP_permP_right {n n'} {c : Fin n → S.C} {c' : Fin n' → S.C}
       (prodRightMap_permCond c2 h) (Pure.prodP p2 p) := by
   conv_lhs => rw [prodP_swap]
   conv_rhs => rw [prodP_swap]
-  simp
+  simp only [prodP_permP_left, prodSwapMap_permCond, permP_permP]
   apply Pure.permP_congr
   · ext i
     obtain ⟨i, rfl⟩ := finSumFinEquiv.surjective i
-    simp [prodSwapMap, prodLeftMap, prodRightMap]
+    simp only [prodLeftMap, prodSwapMap, Function.comp_apply, Equiv.symm_apply_apply, prodRightMap]
     match i with
     | Sum.inl i => rfl
     | Sum.inr i => rfl
@@ -1068,11 +1070,11 @@ lemma prodT_permT_right {n n'} {c : Fin n → S.C} {c' : Fin n' → S.C}
     (prodRightMap_permCond c2 h) (prodT t2 t) := by
   conv_lhs => rw [prodT_swap]
   conv_rhs => rw [prodT_swap]
-  simp
+  simp only [prodT_permT_left, prodSwapMap_permCond, permT_permT]
   apply permT_congr
   · ext i
     obtain ⟨i, rfl⟩ := finSumFinEquiv.surjective i
-    simp [prodSwapMap, prodLeftMap, prodRightMap]
+    simp only [prodLeftMap, prodSwapMap, Function.comp_apply, Equiv.symm_apply_apply, prodRightMap]
     match i with
     | Sum.inl i => rfl
     | Sum.inr i => rfl
@@ -1090,15 +1092,16 @@ lemma Pure.prodP_assoc {n n1 n2} {c : Fin n → S.C}
     obtain ⟨i, rfl⟩ := finSumFinEquiv.surjective i
     match i with
     | Sum.inl i =>
-      simp [prodP_apply_castAdd, permP]
+      simp only [finSumFinEquiv_apply_left, Function.comp_apply, prodP_apply_castAdd, permP]
       rw [← congr_right (p.prodP (p1.prodP p2)) _ _ (prodAssocMap_castAdd_castAdd i)]
       simp [map_map_apply, - eqToHom_refl, - Discrete.functor_map_id]
     | Sum.inr i =>
-      simp [permP]
+      simp only [finSumFinEquiv_apply_right, finSumFinEquiv_apply_left, Function.comp_apply,
+        prodP_apply_castAdd, prodP_apply_natAdd, permP]
       rw [← congr_right (p.prodP (p1.prodP p2)) _ _ (prodAssocMap_castAdd_natAdd i)]
       simp [map_map_apply, - eqToHom_refl, - Discrete.functor_map_id]
   | Sum.inr i =>
-    simp [permP]
+    simp only [finSumFinEquiv_apply_right, Function.comp_apply, prodP_apply_natAdd, permP]
     rw [← congr_right (p.prodP (p1.prodP p2)) _ _ (prodAssocMap_natAdd i)]
     simp [map_map_apply]
 
@@ -1132,7 +1135,7 @@ lemma prodT_assoc {n n1 n2} {c : Fin n → S.C}
     (fun t1 t2 h1 h2 => by
       simp_all only [map_add, LinearMap.add_apply, prodAssocMap_permCond, P3, P]) t2
   intro p2
-  simp [P3, P]
+  simp only [P3, P, P2, P1]
   rw [prodT_pure, prodT_pure, prodT_pure, prodT_pure, permT_pure, Pure.prodP_assoc]
 
 lemma Pure.prodP_assoc' {n n1 n2} {c : Fin n → S.C}
@@ -1144,18 +1147,19 @@ lemma Pure.prodP_assoc' {n n1 n2} {c : Fin n → S.C}
   obtain ⟨i, rfl⟩ := finSumFinEquiv.surjective i
   match i with
   | Sum.inl i =>
-    simp [permP]
+    simp only [finSumFinEquiv_apply_left, Function.comp_apply, prodP_apply_castAdd, permP]
     rw [← congr_right ((p.prodP p1).prodP p2) _ _ (prodAssocMap'_castAdd i)]
     simp [map_map_apply, - eqToHom_refl, - Discrete.functor_map_id]
   | Sum.inr i =>
     obtain ⟨i, rfl⟩ := finSumFinEquiv.surjective i
     match i with
     | Sum.inl i =>
-      simp [permP]
+      simp only [finSumFinEquiv_apply_left, finSumFinEquiv_apply_right, Function.comp_apply,
+        prodP_apply_natAdd, prodP_apply_castAdd, permP]
       rw [← congr_right ((p.prodP p1).prodP p2) _ _ (prodAssocMap'_natAdd_castAdd i)]
       simp [map_map_apply, - eqToHom_refl, - Discrete.functor_map_id]
     | Sum.inr i =>
-      simp [permP]
+      simp only [finSumFinEquiv_apply_right, Function.comp_apply, prodP_apply_natAdd, permP]
       rw [← congr_right ((p.prodP p1).prodP p2) _ _ (prodAssocMap'_natAdd_natAdd i)]
       simp [map_map_apply]
 
@@ -1189,10 +1193,9 @@ lemma prodT_assoc' {n n1 n2} {c : Fin n → S.C}
     (fun t1 t2 h1 h2 => by
       simp_all only [map_add, LinearMap.add_apply, prodAssocMap'_permCond, P3, P]) t2
   intro p2
-  simp [P3, P]
+  simp only [P3, P, P2, P1]
   rw [prodT_pure, prodT_pure, prodT_pure, prodT_pure, permT_pure, Pure.prodP_assoc']
 
 end Tensor
 
 end TensorSpecies
-#lint only simpNF
