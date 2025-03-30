@@ -462,7 +462,10 @@ lemma contrPCoeff_symm {n : ℕ} {c : Fin n → S.C} {i j : Fin n} {hij : i ≠ 
   rw [contrPCoeff, contrPCoeff]
   erw [S.contr_tmul_symm]
   rw [S.contr_congr (S.τ (c i)) (c j) ]
-  simp
+  simp only [Monoidal.tensorUnit_obj, Action.instMonoidalCategory_tensorUnit_V,
+    Equivalence.symm_inverse, Action.functorCategoryEquivalence_functor,
+    Action.FunctorCategoryEquivalence.functor_obj_obj, Functor.comp_obj, Discrete.functor_obj_eq_as,
+    Function.comp_apply]
   change _ = (ConcreteCategory.hom (S.contr.app { as := c j }).hom) _
   congr 2
   · change ((S.FD.map (eqToHom _) ≫ S.FD.map (eqToHom _)).hom) _ = _
@@ -502,7 +505,9 @@ lemma contrPCoeff_invariant {n : ℕ} {c : Fin n → S.C} {i j : Fin n}
           ((S.FD.obj _).ρ g (p i) ⊗ₜ (S.FD.obj _).ρ g ((S.FD.map (eqToHom (by simp [hij])))
           (p j))) := by
         congr 2
-        simp
+        simp only [Equivalence.symm_inverse, Action.functorCategoryEquivalence_functor,
+          Functor.comp_obj, Discrete.functor_obj_eq_as, Function.comp_apply,
+          Action.FunctorCategoryEquivalence.functor_obj_obj]
         have h1 := (S.FD.map (eqToHom (by simp [hij] : { as := c j } =
           (Discrete.functor (Discrete.mk ∘ S.τ)).obj { as := c i }))).comm g
         have h2 := congrFun (congrArg (fun x => x.hom) h1) (p j)
@@ -725,21 +730,325 @@ lemma contrT_comm {n : ℕ} {c : Fin (n + 1 + 1 + 1 + 1) → S.C}
 
 -/
 
-proof_wanted prodT_contrT_snd {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
+
+lemma Pure.dropPairEmb_succAbove {n : ℕ}
+    (i : Fin (n + 1 + 1)) (j : Fin (n + 1)) :
+    dropPairEmb i (i.succAbove j) (Fin.ne_succAbove i j) =
+    i.succAbove ∘ j.succAbove := by
+  let f :  Fin n ↪o Fin (n + 1 + 1) :=
+    ⟨⟨i.succAboveOrderEmb ∘ j.succAboveOrderEmb , by
+      refine Function.Injective.comp ?_ ?_
+      exact Fin.succAbove_right_injective
+      exact Fin.succAbove_right_injective
+      ⟩, by
+      simp only [Function.Embedding.coeFn_mk, Function.comp_apply, OrderEmbedding.le_iff_le,
+        implies_true]⟩
+  have hf : dropPairEmb i (i.succAbove j) (Fin.ne_succAbove i j) = f := by
+    rw [← OrderEmbedding.range_inj]
+    simp [f]
+    change _ = Set.range (i.succAbove ∘ j.succAbove)
+    rw [Set.range_comp]
+    simp
+    ext a
+    simp
+    apply Iff.intro
+    · intro h
+      have ha := Fin.eq_self_or_eq_succAbove i a
+      simp_all
+      obtain ⟨a, rfl⟩ := ha
+      use a
+      simp_all
+      rw [Fin.succAbove_right_injective.eq_iff] at h
+      exact h.2
+    · intro h
+      obtain ⟨a, h1, rfl⟩ := h
+      rw [Fin.succAbove_right_injective.eq_iff]
+      simp_all
+      exact Fin.succAbove_ne i a
+  ext a
+  have hf' := congrFun (congrArg (fun x => x.toFun) hf ) a
+  simp [f] at hf'
+  rw [hf']
+  rfl
+
+
+
+lemma Pure.dropPairEmb_apply_lt_lt  {n : ℕ}
+    (i j : Fin (n + 1 + 1)) (hij : i ≠ j)
+    (m : Fin n) (hi : m.val < i.val) (hj : m.val < j.val) :
+    dropPairEmb i j hij m = m.castSucc.castSucc := by
+  rcases  Fin.eq_self_or_eq_succAbove i j  with hj' | hj'
+  · subst hj'
+    simp at hij
+  obtain ⟨j, rfl⟩ := hj'
+  rw [dropPairEmb_succAbove]
+  simp
+  have hj'' : m.val < j.val := by
+    simp_all [Fin.lt_def, Fin.le_def, Fin.succAbove]
+    by_cases hj : j.val < i.val
+    · simp_all
+    · simp_all
+      omega
+  rw [Fin.succAbove_of_succ_le, Fin.succAbove_of_succ_le]
+  · simp [Fin.le_def]
+    omega
+  · simp_all [Fin.lt_def, Fin.le_def, Fin.succAbove]
+    omega
+
+
+lemma Pure.dropPairEmb_natAdd_apply_castAdd {n n1 : ℕ}
+    (i j : Fin (n + 1 + 1)) (hij : i ≠ j)
+    (m : Fin n1) :
+    (dropPairEmb (n := n1 + n) (Fin.natAdd n1 i) (Fin.natAdd n1 j) (by simp_all [Fin.ne_iff_vne]))
+    (Fin.castAdd n m)
+    = Fin.castAdd (n + 1 + 1) (m) := by
+  rw [dropPairEmb_apply_lt_lt]
+  · simp [Fin.ext_iff]
+  · simp
+    omega
+  · simp
+    omega
+
+
+lemma Pure.dropPairEmb_natAdd_image_range_castAdd {n n1 : ℕ}
+    (i j : Fin (n + 1 + 1)) (hij : i ≠ j) :
+    (dropPairEmb (n := n1 + n) (Fin.natAdd n1 i) (Fin.natAdd n1 j) (by simp_all [Fin.ne_iff_vne])) ''
+    (Set.range (Fin.castAdd (m := n) (n := n1))) = {i | i.1 < n1} := by
+  have hcastRange : Set.range (Fin.castAdd (m := n) (n := n1))  = {i | i.1 < n1} := by
+    rw [@Set.range_eq_iff]
+    apply And.intro
+    · intro a
+      simp
+    · intro b hb
+      simp at hb
+      use ⟨b, by omega⟩
+      simp [Fin.ext_iff]
+  ext a
+  simp
+  conv_lhs =>
+    enter [1, b]
+    rw [dropPairEmb_natAdd_apply_castAdd i j hij]
+  apply Iff.intro
+  · intro h
+    obtain ⟨b, rfl⟩ := h
+    simp
+  · intro h
+    use ⟨a, by omega⟩
+    simp
+
+lemma Pure.dropPairEmb_comm_natAdd {n n1 : ℕ}
+    (i j : Fin (n + 1 + 1)) (hij : i ≠ j)
+    (m : Fin n) :
+    (dropPairEmb (n := n1 + n) (Fin.natAdd n1 i) (Fin.natAdd n1 j) (by simp_all [Fin.ne_iff_vne]))
+    (Fin.natAdd n1 m)
+    = Fin.natAdd (n1) (dropPairEmb i j hij m) := by
+  let f : Fin n ↪o  Fin (n1 + n + 1 + 1) :=
+    ⟨⟨(dropPairEmb (Fin.natAdd n1 i) (Fin.natAdd n1 j) (by simp_all [Fin.ne_iff_vne]))
+    ∘ Fin.natAdd n1 , by
+      simp
+      intro i j
+      simp [Fin.ext_iff]⟩, by
+      intro a b
+      simp
+      rw [Fin.le_def, Fin.le_def]
+      simp⟩
+  let g : Fin n ↪o  Fin (n1 + n + 1 + 1) :=
+      ⟨⟨(Fin.natAdd (n1) ∘ dropPairEmb i j hij), by
+      intro a b
+      simp [Fin.ext_iff]
+      simp [← Fin.ext_iff]⟩, by
+      intro a b
+      simp
+      rw [Fin.le_def, Fin.le_def]
+      simp⟩
+  have hcastRange : Set.range (Fin.castAdd (m := n) (n := n1))  = {i | i.1 < n1} := by
+    rw [@Set.range_eq_iff]
+    apply And.intro
+    · intro a
+      simp
+    · intro b hb
+      simp at hb
+      use ⟨b, by omega⟩
+      simp [Fin.ext_iff]
+  have hnatRange : Set.range (Fin.natAdd (m := n) n1) = (Set.range (Fin.castAdd (m := n) (n := n1)) )ᶜ:= by
+    rw [hcastRange]
+    rw [@Set.range_eq_iff]
+    apply And.intro
+    · intro a
+      simp
+    · intro b hb
+      simp at hb
+      use ⟨b - n1, by omega⟩
+      simp [Fin.ext_iff]
+      omega
+  have hfg : f = g := by
+    rw [← OrderEmbedding.range_inj]
+    simp [f, g]
+    rw [Set.range_comp, Set.range_comp]
+    simp
+    rw [hnatRange]
+    rw [dropPairEmb_image_compl]
+    simp
+    rw [dropPairEmb_natAdd_image_range_castAdd i j hij]
+    ext a
+    simp
+    apply Iff.intro
+    · intro h
+      use ⟨a - n1, by omega⟩
+      simp [Fin.ext_iff] at h ⊢
+      omega
+    · intro h
+      obtain ⟨x, h1, rfl⟩ := h
+      simp_all [Fin.ext_iff]
+  simpa using  congrFun (congrArg (fun x => x.toFun) hfg ) m
+
+lemma Pure.dropPairEmb_permCond_prod {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
+    {c1 : Fin n1 → S.C}
+    (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ c i = S.τ (c j)) :
+    PermCond
+      ((Sum.elim c1 c ∘ finSumFinEquiv.symm) ∘
+        (dropPairEmb (finSumFinEquiv (m := n1) (Sum.inr i))
+        (finSumFinEquiv (m := n1) (Sum.inr j)) (by
+          simp [hij, - finSumFinEquiv_apply_right, finSumFinEquiv.injective.eq_iff])))
+      (Sum.elim c1 (c ∘ ⇑(dropPairEmb i j hij.1)) ∘ finSumFinEquiv.symm)
+      id := by
+  apply And.intro (Function.bijective_id)
+  intro m
+  simp
+  obtain ⟨m, rfl⟩ := finSumFinEquiv.surjective m
+  simp
+  match m with
+  | Sum.inl m =>
+    simp
+    rw [dropPairEmb_natAdd_apply_castAdd i j hij.1]
+    simp
+  | Sum.inr m =>
+    simp
+    rw [dropPairEmb_comm_natAdd i j hij.1]
+    simp
+
+@[simp]
+lemma Pure.contrPCoeff_natAdd {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
+    {c1 : Fin n1 → S.C}
+    (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ c i = S.τ (c j))
+    (p : Pure S c) (p1 : Pure S c1) :
+    contrPCoeff (Fin.natAdd n1 i) (Fin.natAdd n1 j)
+    (by simp_all [Fin.ext_iff])  (p1.prodP p)
+    = contrPCoeff i j hij p := by
+  simp [contrPCoeff]
+  conv_lhs => erw [S.contr_congr ((Sum.elim c1 c (finSumFinEquiv.symm (Fin.natAdd n1 i)))) ((c i)) (by simp ) ]
+  apply congrArg
+  congr 1
+  · change  (ConcreteCategory.hom (S.FD.map (Discrete.eqToHom _)))
+      ((ConcreteCategory.hom (S.FD.map (eqToHom _))) (p i)) = _
+    simp [map_map_apply]
+  · change  (ConcreteCategory.hom (S.FD.map (Discrete.eqToHom _)))
+      ((ConcreteCategory.hom (S.FD.map (eqToHom _))) (_)) = _
+    simp [map_map_apply]
+
+@[simp]
+lemma Pure.contrPCoeff_castAdd {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
+    {c1 : Fin n1 → S.C}
+    (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ c i = S.τ (c j))
+    (p : Pure S c) (p1 : Pure S c1) :
+    contrPCoeff (Fin.castAdd n1 i) (Fin.castAdd n1 j)
+    (by simp_all [Fin.ext_iff])  (p.prodP p1)
+    = contrPCoeff i j hij p := by
+  simp [contrPCoeff]
+  conv_lhs => erw [S.contr_congr _ ((c i)) (by simp)]
+  apply congrArg
+  congr 1
+  · change  (ConcreteCategory.hom (S.FD.map (Discrete.eqToHom _)))
+      ((ConcreteCategory.hom (S.FD.map (eqToHom _))) (p i)) = _
+    simp [map_map_apply]
+  · change  (ConcreteCategory.hom (S.FD.map (Discrete.eqToHom _)))
+      ((ConcreteCategory.hom (S.FD.map (eqToHom _))) (_)) = _
+    simp [map_map_apply]
+
+lemma Pure.prodP_dropPair {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
+    {c1 : Fin n1 → S.C}
+    (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ c i = S.τ (c j))
+    (p : Pure S c) (p1 : Pure S c1) :
+    p1.prodP (dropPair i j hij.1 p) = permP id (Pure.dropPairEmb_permCond_prod i j hij)
+    (dropPair (Fin.natAdd n1 i) (Fin.natAdd n1 j)
+    (by simp_all [Fin.ext_iff] ) (p1.prodP p)) := by
+  ext x
+  obtain ⟨x, rfl⟩ := finSumFinEquiv.surjective x
+  rw [prodP_apply_finSumFinEquiv]
+  simp [permP, dropPair, dropEm]
+  match x with
+  | Sum.inl x =>
+    simp
+    rw [← congr_right (p1.prodP p) _ (Fin.castAdd (n + 1 + 1) x)
+      (by rw [dropPairEmb_natAdd_apply_castAdd i j hij.1])]
+    simp [map_map_apply]
+  | Sum.inr m =>
+    simp
+    rw [← congr_right (p1.prodP p) _ (Fin.natAdd (n1) (dropPairEmb i j hij.1 m))
+      (by rw [dropPairEmb_comm_natAdd i j hij.1])]
+    simp [map_map_apply]
+
+lemma Pure.prodP_contrP_snd {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
+    {c1 : Fin n1 → S.C}
+    (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ c i = S.τ (c j))
+    (p : Pure S c) (p1 : Pure S c1) :
+    prodT p1.toTensor (contrP i j hij p) =
+    ((permT id (Pure.dropPairEmb_permCond_prod i j hij)) <|
+    contrP
+      (finSumFinEquiv (m := n1) (Sum.inr i))
+      (finSumFinEquiv (m := n1) (Sum.inr j))
+      (by simp [hij, - finSumFinEquiv_apply_right, finSumFinEquiv.injective.eq_iff]) <|
+    prodP p1 p) := by
+  simp only [ne_eq, contrP, map_smul, Nat.add_eq, finSumFinEquiv_apply_right, Sum.elim_inr]
+  rw [contrPCoeff_natAdd i j hij]
+  congr 1
+  rw [prodT_pure, permT_pure]
+  congr
+  rw [prodP_dropPair _ _ hij]
+
+lemma prodT_contrT_snd {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
     {c1 : Fin n1 → S.C}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ c i = S.τ (c j))
     (t : Tensor S c) (t1 : Tensor S c1) :
     prodT t1 (contrT i j hij t) =
-    (permT id (And.intro (Function.bijective_id) (by
-      intro k
-      simp only [Nat.add_eq, id_eq, Function.comp_apply]
-      sorry
-      )) <|
+    ((permT id (Pure.dropPairEmb_permCond_prod i j hij)) <|
     contrT
       (finSumFinEquiv (m := n1) (Sum.inr i))
       (finSumFinEquiv (m := n1) (Sum.inr j))
       (by simp [hij, - finSumFinEquiv_apply_right, finSumFinEquiv.injective.eq_iff]) <|
+    prodT t1 t) := by
+  generalize_proofs ha hb hc hd he
+  let P (t : Tensor S c) (t1 : Tensor S c1) : Prop :=
+    prodT t1 (contrT i j hij t) =
+    ((permT id (Pure.dropPairEmb_permCond_prod i j hij)) <|
+    contrT
+      (finSumFinEquiv (m := n1) (Sum.inr i))
+      (finSumFinEquiv (m := n1) (Sum.inr j)) he <|
     prodT t1 t)
+  let P1 (t : Tensor S c) := P t t1
+  change P1 t
+  refine induction_on_pure ?_
+    (fun r t h1 => by
+      dsimp only [P1, P] at h1
+      simp only [h1, map_smul, P1, P])
+    (fun t1 t2 h1 h2 => by
+      dsimp only [P1, P] at h1 h2
+      simp only [h1, h2, map_add, P1, P]) t
+  intro p
+  let P2 (t1 : Tensor S c1) := P p.toTensor t1
+  change P2 t1
+  refine induction_on_pure ?_
+    (fun r t h1 => by
+      dsimp only [P1, P, P2] at h1
+      simp only [h1, map_smul, LinearMap.smul_apply, P1, P, P2])
+    (fun t1 t2 h1 h2 => by
+      dsimp only [P1, P, P2] at h1 h2
+      simp only [h1, h2, map_add, LinearMap.add_apply, P2, P1, P]) t1
+  intro p1
+  simp only [ne_eq, Nat.add_eq, finSumFinEquiv_apply_right, Function.comp_apply, contrT_pure, P2, P,
+    P1]
+  rw [Pure.prodP_contrP_snd, prodT_pure, contrT_pure]
+  rfl
 
 end Tensor
 
