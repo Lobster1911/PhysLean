@@ -19,6 +19,8 @@ open OverColor
 
 variable {k : Type} [CommRing k] (S : TensorSpecies k)
 
+/-- The tensors associated with a list of indicies of a given color
+  `c : Fin n → S.C`. s-/
 noncomputable abbrev Tensor {n : ℕ} (c : Fin n → S.C) : Type := (S.F.obj (OverColor.mk c))
 
 namespace Tensor
@@ -26,6 +28,9 @@ namespace Tensor
 variable {S : TensorSpecies k} {n n' n2 : ℕ} {c : Fin n → S.C} {c' : Fin n' → S.C}
   {c2 : Fin n2 → S.C}
 
+/-- Given a list of indices `c : Fin n → S.C` e.g. `![.up, .down]`, the type
+  `ComponentIdx c` is the type of components indexes of a tensor with those indices
+  e.g. `⟨0, 2⟩` corresponding to `T⁰₂`. -/
 abbrev ComponentIdx {n : ℕ} (c : Fin n → S.C) : Type := Π j, Fin (S.repDim (c j))
 
 lemma ComponentIdx.congr_right {n : ℕ} {c : Fin n → S.C} (b : ComponentIdx c)
@@ -39,7 +44,8 @@ lemma ComponentIdx.congr_right {n : ℕ} {c : Fin n → S.C} (b : ComponentIdx c
 
 -/
 
-/-- The type of tensors specified by a map to colors `c : OverColor S.C`. -/
+/-- The type of pure tensors associated to a list of indices `c : OverColor S.C`.
+  A pure tensor is a tensor which can be written in the form `v1 ⊗ₜ v2 ⊗ₜ v3 …`. -/
 abbrev Pure (S : TensorSpecies k) (c : Fin n → S.C) : Type :=
     (i : Fin n) → S.FD.obj (Discrete.mk (c i))
 
@@ -69,12 +75,18 @@ lemma map_map_apply {n : ℕ} {c : Fin n → S.C} (c1 c2 : S.C) (p : Pure S c) (
     S.FD.map (f ≫ g) (p i) := by
   simp only [Functor.map_comp, ConcreteCategory.comp_apply]
 
+/-- The tensor correpsonding to a pure tensor. -/
 noncomputable def toTensor {n : ℕ} {c : Fin n → S.C} (p : Pure S c) : S.Tensor c :=
   PiTensorProduct.tprod k p
 
 lemma toTensor_apply {n : ℕ} (c : Fin n → S.C) (p : Pure S c) :
     toTensor p = PiTensorProduct.tprod k p := rfl
 
+/-- Given a list of indices `c` of `n` indices, a pure tensor `p`, an element `i : Fin n` and
+  a `x` in `S.FD.obj (Discrete.mk (c i))` then `update p i x` corresponds to `p` where
+  the `i`th part of `p` is replaced with `x`.
+
+  E.g. if `n = 2` and `p = v₀ ⊗ₜ v₁` then `update p 0 x = x ⊗ₜ v₁`. -/
 def update {n : ℕ} {c : Fin n → S.C} [inst : DecidableEq (Fin n)] (p : Pure S c) (i : Fin n)
     (x : S.FD.obj (Discrete.mk (c i))) : Pure S c := Function.update p i x
 
@@ -95,6 +107,10 @@ lemma toTensor_update_smul {n : ℕ} {c : Fin n → S.C} [inst : DecidableEq (Fi
     (update p i (r • y)).toTensor = r • (update p i y).toTensor := by
   simp [toTensor, update]
 
+/-- Given a list of indices `c` of length `n + 1`, a pure tensor `p` and an `i : Fin (n + 1)`, then
+  `drop p i` is the tensor `p` with it's `i`th part dropped.
+
+  For example, if `n = 2` and `p = v₀ ⊗ₜ v₁ ⊗ₜ v₂` then `drop p 1 = v₀ ⊗ₜ v₂`. -/
 def drop {n : ℕ} {c : Fin (n + 1) → S.C} (p : Pure S c) (i : Fin (n + 1)) :
     Pure S (c ∘ i.succAbove) :=
   fun j => p (i.succAbove j)
@@ -151,6 +167,11 @@ lemma μ_toTensor_tmul_toTensor {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.
 
 -/
 
+/-- Given an element `b` of `ComponentIdx c` and a pure tensor `p` then
+  `component p b` is the element of the ring `k` correpsonding to
+  the component of `p` in the direction `b`.
+
+  For example, if `p = v ⊗ₜ w` and `b = ⟨0, 1⟩` then `component p b = v⁰ ⊗ₜ w¹`. -/
 def component {n : ℕ} {c : Fin n → S.C} (p : Pure S c) (b : ComponentIdx c) : k :=
     ∏ i, (S.basis (c i)).repr (p i) (b i)
 
@@ -189,6 +210,8 @@ lemma component_update_smul {n : ℕ} [inst : DecidableEq (Fin n)]
   simp only [update_same, map_smul, Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul, update_drop_self]
   ring
 
+/-- The multilinear map taking pure tensors `p` to a map `ComponentIdx c → k` which when
+  evaluated returns the components of `p`. -/
 noncomputable def componentMap {n : ℕ} (c : Fin n → S.C) :
     MultilinearMap k (fun i => S.FD.obj (Discrete.mk (c i))) (ComponentIdx c → k) where
   toFun p := fun b => component p b
@@ -207,6 +230,8 @@ lemma componentMap_apply {n : ℕ} (c : Fin n → S.C)
     (p : Pure S c) : componentMap c p = p.component := by
   rfl
 
+/-- Given an component idx `b` in `ComponentIdx c`, `basisVector c b` is the pure tensor
+  formed by `S.basis (c i) (b i)`. -/
 noncomputable def basisVector {n : ℕ} (c : Fin n → S.C) (b : ComponentIdx c) : Pure S c :=
   fun i => S.basis (c i) (b i)
 
@@ -250,7 +275,7 @@ lemma induction_on_pure {n : ℕ} {c : Fin n → S.C} {P : S.Tensor c → Prop}
 
 noncomputable section Basis
 
-/-- The linear map from tensors to coordinates. -/
+/-- The linear map from tensors to its components. -/
 def componentMap {n : ℕ} (c : Fin n → S.C) : S.Tensor c →ₗ[k] (ComponentIdx c → k) :=
   PiTensorProduct.lift (Pure.componentMap c)
 
@@ -261,8 +286,9 @@ lemma componentMap_pure {n : ℕ} (c : Fin n → S.C)
   change (PiTensorProduct.lift (Pure.componentMap c)) ((PiTensorProduct.tprod k) p) = _
   simp [PiTensorProduct.lift_tprod]
 
+/-- The tensor created from it's components. -/
 def ofComponents {n : ℕ} (c : Fin n → S.C) :
-    (ComponentIdx c → k) →ₗ[k] S.F.obj (OverColor.mk c) where
+    (ComponentIdx c → k) →ₗ[k] S.Tensor c where
   toFun f := ∑ b, f b • (Pure.basisVector c b).toTensor
   map_add' fb gb := by
     simp [add_smul, Finset.sum_add_distrib]

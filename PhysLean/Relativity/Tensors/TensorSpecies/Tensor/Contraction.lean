@@ -630,7 +630,7 @@ lemma contrT_pure {n : ℕ} {c : Fin (n + 1 + 1) → S.C} (i j : Fin (n + 1 + 1)
       (hij : i ≠ j ∧ c i = S.τ (c j)) (p : Pure S c) :
     contrT i j hij p.toTensor = p.contrP i j hij := by
   simp only [contrT, Pure.toTensor]
-  change _ = ((Pure.contrPMultilinear i j hij) p)
+  change _ = Pure.contrPMultilinear i j hij p
   conv_rhs => rw [← PiTensorProduct.lift.tprod]
   rfl
 
@@ -943,7 +943,6 @@ lemma Pure.dropPairEmb_permCond_prod {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
     rw [dropPairEmb_comm_natAdd i j hij.1]
     simp
 
-@[simp]
 lemma Pure.contrPCoeff_natAdd {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
     {c1 : Fin n1 → S.C}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ c i = S.τ (c j))
@@ -966,7 +965,6 @@ lemma Pure.contrPCoeff_natAdd {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
       ((ConcreteCategory.hom (S.FD.map (eqToHom _))) _) = _
     simp [map_map_apply]
 
-@[simp]
 lemma Pure.contrPCoeff_castAdd {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
     {c1 : Fin n1 → S.C}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ c i = S.τ (c j))
