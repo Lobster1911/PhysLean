@@ -441,14 +441,23 @@ And their interactions with
 - actions
 -/
 
+/-- Given two lists of indices `c : Fin n → S.C` and `c1 : Fin m → S.C` a map
+  `σ : Fin m → Fin n` satisfies the condition `PermCond c c1 σ` if it is:
+- A bijection
+- Forms a commutative triangle with `c` and `c1`.
+-/
 def PermCond {n m : ℕ} (c : Fin n → S.C) (c1 : Fin m → S.C)
       (σ : Fin m → Fin n) : Prop :=
     Function.Bijective σ ∧ ∀ i, c (σ i) = c1 i
 
+/-- For a map `σ` satisfying `PermCond c c1 σ`, the inverse of that map. -/
 def PermCond.inv {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
       (σ : Fin m → Fin n) (h : PermCond c c1 σ) : Fin n → Fin m :=
   Fintype.bijInv h.1
 
+/-- For a map `σ : Fin m → Fin n` satisfying `PermCond c c1 σ`,
+  that map lifted to an equivalence between
+  `Fin n` and `Fin m`. -/
 def PermCond.toEquiv {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
       {σ : Fin m → Fin n} (h : PermCond c c1 σ) :
       Fin n ≃ Fin m where
@@ -465,11 +474,15 @@ lemma PermCond.preserve_color {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.
   simp only [Function.comp_apply, Equiv.symm_apply_apply]
   rw [h.2]
 
+/-- For a map `σ : Fin m → Fin n` satisfying `PermCond c c1 σ`,
+  that map lifted to a morphism in the `OverColor C` category. -/
 def PermCond.toHom {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
       {σ : Fin m → Fin n} (h : PermCond c c1 σ) :
       OverColor.mk c ⟶ OverColor.mk c1 :=
     equivToHomEq (h.toEquiv) (h.preserve_color)
 
+/-- Given a morphism in the `OverColor C` between `c` and `c1` category the corresponding morphism
+  `(Hom.toEquiv σ).symm` satisfies the `PermCond`. -/
 lemma PermCond.ofHom {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
       (σ : OverColor.mk c ⟶ OverColor.mk c1) :
       PermCond c c1 (Hom.toEquiv σ).symm := by
@@ -478,6 +491,7 @@ lemma PermCond.ofHom {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
   · intro x
     simpa [OverColor.mk_hom] using Hom.toEquiv_symm_apply σ x
 
+/-- The composition of two maps satisfying `PermCond` also satifies the `PermCond`. -/
 lemma PermCond.comp {n n1 n2 : ℕ} {c : Fin n → S.C} {c1 : Fin n1 → S.C}
       {c2 : Fin n2 → S.C} {σ : Fin n1 → Fin n} {σ2 : Fin n2 → Fin n1}
       (h : PermCond c c1 σ) (h2 : PermCond c1 c2 σ2) :
@@ -487,6 +501,9 @@ lemma PermCond.comp {n n1 n2 : ℕ} {c : Fin n → S.C} {c1 : Fin n1 → S.C}
   · intro x
     simp only [Function.comp_apply]
     rw [h.2, h2.2]
+
+TODO "Prove that if `σ` satifies `PermCond c c1 σ` then `PermCond.inv σ h`
+  satifies `PermCond c1 c (PermCond.inv σ h)`."
 
 lemma fin_cast_permCond (n n1 : ℕ) {c : Fin n → S.C} (h : n1 = n) :
       PermCond c (c ∘ Fin.cast h) (Fin.cast h) := by
@@ -499,6 +516,12 @@ lemma fin_cast_permCond (n n1 : ℕ) {c : Fin n → S.C} (h : n1 = n) :
 ## Permutations
 
 -/
+
+/-- Given a permutation `σ : Fin m → Fin n` of indices satisfying `PermCond` through `h`,
+  and a pure tensor `p`, `permP σ h p` is the pure tensor permuted accordinge to `σ`.
+
+  For example if `m = n = 2` and `σ = ![1, 0]`, and `p = v ⊗ₜ w` then
+  `permP σ _ p = w ⊗ₜ v`. -/
 def Pure.permP {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
       (σ : Fin m → Fin n) (h : PermCond c c1 σ) (p : Pure S c) : Pure S c1 :=
     fun i => S.FD.map (eqToHom (by simp [h.preserve_color])) (p (σ i))
@@ -518,6 +541,8 @@ lemma Pure.permP_basisVector {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C
   apply h1
   simp [h.preserve_color]
 
+/-- Given a permutation `σ : Fin m → Fin n` of indices satisfying `PermCond` through `h`,
+  and a tensor `t`, `permT σ h t` is the tensor tensor permuted accordinge to `σ`. -/
 noncomputable def permT {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
       (σ : Fin m → Fin n) (h : PermCond c c1 σ) : S.Tensor c →ₗ[k] S.Tensor c1 where
   toFun t := (ConcreteCategory.hom (S.F.map h.toHom).hom) t
