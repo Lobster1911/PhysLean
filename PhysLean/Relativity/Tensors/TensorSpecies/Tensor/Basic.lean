@@ -140,9 +140,9 @@ lemma update_drop_self {n : ℕ} {c : Fin (n + 1) → S.C} [inst : DecidableEq (
   exact Fin.succAbove_ne i k
 
 lemma μ_toTensor_tmul_toTensor {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
-      (t : Pure S c) (t1 : Pure S c1) :
-      ((Functor.LaxMonoidal.μ S.F _ _).hom (t.toTensor ⊗ₜ t1.toTensor)) =
-      PiTensorProduct.tprod k (fun | Sum.inl i => t i | Sum.inr i => t1 i) := by
+    (t : Pure S c) (t1 : Pure S c1) :
+    ((Functor.LaxMonoidal.μ S.F _ _).hom (t.toTensor ⊗ₜ t1.toTensor)) =
+    PiTensorProduct.tprod k (fun | Sum.inl i => t i | Sum.inr i => t1 i) := by
   change lift.μModEquiv _ _ _ (t.toTensor ⊗ₜ t1.toTensor) = _
   rw [lift.μModEquiv]
   simp only [lift.objObj'_V_carrier, OverColor.instMonoidalCategoryStruct_tensorObj_left,
@@ -447,28 +447,28 @@ And their interactions with
 - Forms a commutative triangle with `c` and `c1`.
 -/
 def PermCond {n m : ℕ} (c : Fin n → S.C) (c1 : Fin m → S.C)
-      (σ : Fin m → Fin n) : Prop :=
-    Function.Bijective σ ∧ ∀ i, c (σ i) = c1 i
+    (σ : Fin m → Fin n) : Prop :=
+  Function.Bijective σ ∧ ∀ i, c (σ i) = c1 i
 
 /-- For a map `σ` satisfying `PermCond c c1 σ`, the inverse of that map. -/
 def PermCond.inv {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
-      (σ : Fin m → Fin n) (h : PermCond c c1 σ) : Fin n → Fin m :=
+    (σ : Fin m → Fin n) (h : PermCond c c1 σ) : Fin n → Fin m :=
   Fintype.bijInv h.1
 
 /-- For a map `σ : Fin m → Fin n` satisfying `PermCond c c1 σ`,
   that map lifted to an equivalence between
   `Fin n` and `Fin m`. -/
 def PermCond.toEquiv {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
-      {σ : Fin m → Fin n} (h : PermCond c c1 σ) :
-      Fin n ≃ Fin m where
+    {σ : Fin m → Fin n} (h : PermCond c c1 σ) :
+    Fin n ≃ Fin m where
   toFun := PermCond.inv σ h
   invFun := σ
   left_inv := Fintype.rightInverse_bijInv h.1
   right_inv := Fintype.leftInverse_bijInv h.1
 
 lemma PermCond.preserve_color {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
-      {σ : Fin m → Fin n} (h : PermCond c c1 σ) :
-      ∀ (x : Fin m), c1 x = (c ∘ σ) x := by
+    {σ : Fin m → Fin n} (h : PermCond c c1 σ) :
+    ∀ (x : Fin m), c1 x = (c ∘ σ) x := by
   intro x
   obtain ⟨y, rfl⟩ := h.toEquiv.surjective x
   simp only [Function.comp_apply, Equiv.symm_apply_apply]
@@ -477,15 +477,15 @@ lemma PermCond.preserve_color {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.
 /-- For a map `σ : Fin m → Fin n` satisfying `PermCond c c1 σ`,
   that map lifted to a morphism in the `OverColor C` category. -/
 def PermCond.toHom {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
-      {σ : Fin m → Fin n} (h : PermCond c c1 σ) :
-      OverColor.mk c ⟶ OverColor.mk c1 :=
-    equivToHomEq (h.toEquiv) (h.preserve_color)
+    {σ : Fin m → Fin n} (h : PermCond c c1 σ) :
+    OverColor.mk c ⟶ OverColor.mk c1 :=
+  equivToHomEq (h.toEquiv) (h.preserve_color)
 
 /-- Given a morphism in the `OverColor C` between `c` and `c1` category the corresponding morphism
   `(Hom.toEquiv σ).symm` satisfies the `PermCond`. -/
 lemma PermCond.ofHom {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
-      (σ : OverColor.mk c ⟶ OverColor.mk c1) :
-      PermCond c c1 (Hom.toEquiv σ).symm := by
+    (σ : OverColor.mk c ⟶ OverColor.mk c1) :
+    PermCond c c1 (Hom.toEquiv σ).symm := by
   apply And.intro
   · exact Equiv.bijective (Hom.toEquiv σ).symm
   · intro x
@@ -493,9 +493,9 @@ lemma PermCond.ofHom {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
 
 /-- The composition of two maps satisfying `PermCond` also satifies the `PermCond`. -/
 lemma PermCond.comp {n n1 n2 : ℕ} {c : Fin n → S.C} {c1 : Fin n1 → S.C}
-      {c2 : Fin n2 → S.C} {σ : Fin n1 → Fin n} {σ2 : Fin n2 → Fin n1}
-      (h : PermCond c c1 σ) (h2 : PermCond c1 c2 σ2) :
-      PermCond c c2 (σ ∘ σ2) := by
+    {c2 : Fin n2 → S.C} {σ : Fin n1 → Fin n} {σ2 : Fin n2 → Fin n1}
+    (h : PermCond c c1 σ) (h2 : PermCond c1 c2 σ2) :
+    PermCond c c2 (σ ∘ σ2) := by
   apply And.intro
   · refine Function.Bijective.comp h.1 h2.1
   · intro x
@@ -506,11 +506,11 @@ TODO "Prove that if `σ` satifies `PermCond c c1 σ` then `PermCond.inv σ h`
   satifies `PermCond c1 c (PermCond.inv σ h)`."
 
 lemma fin_cast_permCond (n n1 : ℕ) {c : Fin n → S.C} (h : n1 = n) :
-      PermCond c (c ∘ Fin.cast h) (Fin.cast h) := by
-    apply And.intro
-    · exact Equiv.bijective (finCongr h)
-    · intro i
-      rfl
+    PermCond c (c ∘ Fin.cast h) (Fin.cast h) := by
+  apply And.intro
+  · exact Equiv.bijective (finCongr h)
+  · intro i
+    rfl
 /-!
 
 ## Permutations
@@ -523,14 +523,14 @@ lemma fin_cast_permCond (n n1 : ℕ) {c : Fin n → S.C} (h : n1 = n) :
   For example if `m = n = 2` and `σ = ![1, 0]`, and `p = v ⊗ₜ w` then
   `permP σ _ p = w ⊗ₜ v`. -/
 def Pure.permP {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
-      (σ : Fin m → Fin n) (h : PermCond c c1 σ) (p : Pure S c) : Pure S c1 :=
-    fun i => S.FD.map (eqToHom (by simp [h.preserve_color])) (p (σ i))
+    (σ : Fin m → Fin n) (h : PermCond c c1 σ) (p : Pure S c) : Pure S c1 :=
+  fun i => S.FD.map (eqToHom (by simp [h.preserve_color])) (p (σ i))
 
 @[simp]
 lemma Pure.permP_basisVector {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
-      (σ : Fin m → Fin n) (h : PermCond c c1 σ) (b : ComponentIdx c) :
-      Pure.permP σ h (Pure.basisVector c b) =
-      Pure.basisVector c1 (fun i => Fin.cast (by simp [h.preserve_color]) (b (σ i))) := by
+    (σ : Fin m → Fin n) (h : PermCond c c1 σ) (b : ComponentIdx c) :
+    Pure.permP σ h (Pure.basisVector c b) =
+    Pure.basisVector c1 (fun i => Fin.cast (by simp [h.preserve_color]) (b (σ i))) := by
   ext i
   simp only [permP, basisVector]
   have h1 {c1 c2 : S.C} (h : c1 = c2) (x : Fin (S.repDim c1)) :
@@ -544,7 +544,7 @@ lemma Pure.permP_basisVector {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C
 /-- Given a permutation `σ : Fin m → Fin n` of indices satisfying `PermCond` through `h`,
   and a tensor `t`, `permT σ h t` is the tensor tensor permuted accordinge to `σ`. -/
 noncomputable def permT {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
-      (σ : Fin m → Fin n) (h : PermCond c c1 σ) : S.Tensor c →ₗ[k] S.Tensor c1 where
+    (σ : Fin m → Fin n) (h : PermCond c c1 σ) : S.Tensor c →ₗ[k] S.Tensor c1 where
   toFun t := (ConcreteCategory.hom (S.F.map h.toHom).hom) t
   map_add' t1 t2 := by
     simp
@@ -552,48 +552,48 @@ noncomputable def permT {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
     simp
 
 lemma permT_pure {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
-      {σ : Fin m → Fin n} (h : PermCond c c1 σ) (p : Pure S c) :
-      permT σ h p.toTensor = (p.permP σ h).toTensor := by
+    {σ : Fin m → Fin n} (h : PermCond c c1 σ) (p : Pure S c) :
+    permT σ h p.toTensor = (p.permP σ h).toTensor := by
   simp only [F_def, permT, Pure.toTensor, LinearMap.coe_mk, AddHom.coe_mk]
   rw [OverColor.lift.map_tprod]
   rfl
 
 @[simp]
 lemma permT_equivariant {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
-      {σ : Fin m → Fin n} (h : PermCond c c1 σ) (g : S.G) (t : S.Tensor c) :
-      permT σ h (g • t) = g • permT σ h t := by
+    {σ : Fin m → Fin n} (h : PermCond c c1 σ) (g : S.G) (t : S.Tensor c) :
+    permT σ h (g • t) = g • permT σ h t := by
   simp only [permT, actionT_eq, LinearMap.coe_mk, AddHom.coe_mk]
   exact Rep.hom_comm_apply (S.F.map h.toHom) g t
 
 @[congr]
 lemma Pure.permP_congr {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
-      {σ σ1 : Fin m → Fin n} {h : PermCond c c1 σ} {h1 : PermCond c c1 σ1}
-      {p p1 : Pure S c} (hmap : σ = σ1) (hpure : p = p1) :
-      Pure.permP σ h p = Pure.permP σ1 h1 p1 := by
+    {σ σ1 : Fin m → Fin n} {h : PermCond c c1 σ} {h1 : PermCond c c1 σ1}
+    {p p1 : Pure S c} (hmap : σ = σ1) (hpure : p = p1) :
+    Pure.permP σ h p = Pure.permP σ1 h1 p1 := by
   subst hmap hpure
   rfl
 
 @[congr]
 lemma permT_congr {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
-      {σ σ1 : Fin m → Fin n} {h : PermCond c c1 σ} {h1 : PermCond c c1 σ1}
-      (hmap : σ = σ1) {t t1: S.Tensor c} (htensor : t = t1) :
-      permT σ h t = permT σ1 h1 t1 := by
+    {σ σ1 : Fin m → Fin n} {h : PermCond c c1 σ} {h1 : PermCond c c1 σ1}
+    (hmap : σ = σ1) {t t1: S.Tensor c} (htensor : t = t1) :
+    permT σ h t = permT σ1 h1 t1 := by
   subst hmap htensor
   rfl
 
 @[simp]
 lemma Pure.permP_permP {n m1 m2 : ℕ} {c : Fin n → S.C} {c1 : Fin m1 → S.C} {c2 : Fin m2 → S.C}
-      {σ : Fin m1 → Fin n} {σ2 : Fin m2 → Fin m1} (h : PermCond c c1 σ) (h2 : PermCond c1 c2 σ2)
-      (p : Pure S c) :
-      Pure.permP σ2 h2 (Pure.permP σ h p) = Pure.permP (σ ∘ σ2) (PermCond.comp h h2) p := by
+    {σ : Fin m1 → Fin n} {σ2 : Fin m2 → Fin m1} (h : PermCond c c1 σ) (h2 : PermCond c1 c2 σ2)
+    (p : Pure S c) :
+    Pure.permP σ2 h2 (Pure.permP σ h p) = Pure.permP (σ ∘ σ2) (PermCond.comp h h2) p := by
   ext i
   simp [permP, Pure.permP, Function.comp_apply, map_map_apply]
 
 @[simp]
 lemma permT_permT {n m1 m2 : ℕ} {c : Fin n → S.C} {c1 : Fin m1 → S.C} {c2 : Fin m2 → S.C}
-      {σ : Fin m1 → Fin n} {σ2 : Fin m2 → Fin m1} (h : PermCond c c1 σ) (h2 : PermCond c1 c2 σ2)
-      (t : S.Tensor c) :
-      permT σ2 h2 (permT σ h t) = permT (σ ∘ σ2) (PermCond.comp h h2) t := by
+    {σ : Fin m1 → Fin n} {σ2 : Fin m2 → Fin m1} (h : PermCond c c1 σ) (h2 : PermCond c1 c2 σ2)
+    (t : S.Tensor c) :
+    permT σ2 h2 (permT σ h t) = permT (σ ∘ σ2) (PermCond.comp h h2) t := by
   let P (t : S.Tensor c) := permT σ2 h2 (permT σ h t) = permT (σ ∘ σ2) (PermCond.comp h h2) t
   change P t
   apply induction_on_basis
@@ -633,11 +633,11 @@ def ComponentIdx.prod {n1 n2 : ℕ} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
   ComponentIdx.prodEquiv.symm fun | Sum.inl i => b i | Sum.inr i => b1 i
 
 lemma ComponentIdx.prod_apply_finSumFinEquiv {n1 n2 : ℕ} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
-      (b : ComponentIdx c) (b1 : ComponentIdx c1) (i : Fin n1 ⊕ Fin n2) :
-      ComponentIdx.prod b b1 (finSumFinEquiv i) =
-      match i with
-      | Sum.inl i => Fin.cast (by simp) (b i)
-      | Sum.inr i => Fin.cast (by simp) (b1 i) := by
+    (b : ComponentIdx c) (b1 : ComponentIdx c1) (i : Fin n1 ⊕ Fin n2) :
+    ComponentIdx.prod b b1 (finSumFinEquiv i) =
+    match i with
+    | Sum.inl i => Fin.cast (by simp) (b i)
+    | Sum.inr i => Fin.cast (by simp) (b1 i) := by
   rw [ComponentIdx.prod]
   rw [prodEquiv]
   simp only [Equiv.symm_symm]
@@ -701,9 +701,9 @@ lemma Pure.prodP_apply_natAdd {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
   simp
 
 lemma Pure.prodP_basisVector {n n1 : ℕ} {c : Fin n → S.C} {c1 : Fin n1 → S.C}
-      (b : ComponentIdx c) (b1 : ComponentIdx c1) :
-      Pure.prodP (Pure.basisVector c b) (Pure.basisVector c1 b1) =
-      Pure.basisVector _ (b.prod b1) := by
+    (b : ComponentIdx c) (b1 : ComponentIdx c1) :
+    Pure.prodP (Pure.basisVector c b) (Pure.basisVector c1 b1) =
+    Pure.basisVector _ (b.prod b1) := by
   ext i
   obtain ⟨i, rfl⟩ := finSumFinEquiv.surjective i
   rw [Pure.prodP_apply_finSumFinEquiv]
@@ -902,10 +902,10 @@ lemma prodSwapMap_permCond {n1 n2 : ℕ} {c : Fin n1 → S.C} {c2 : Fin n2 → S
 
 @[simp]
 lemma prodAssocMap_permCond {n1 n2 n3 : ℕ} {c : Fin n1 → S.C} {c2 : Fin n2 → S.C}
-      {c3 : Fin n3 → S.C} :
-      PermCond (Sum.elim c (Sum.elim c2 c3 ∘ finSumFinEquiv.symm) ∘ finSumFinEquiv.symm)
-      (Sum.elim (Sum.elim c c2 ∘ finSumFinEquiv.symm) c3 ∘ finSumFinEquiv.symm)
-      (prodAssocMap n1 n2 n3) := by
+    {c3 : Fin n3 → S.C} :
+    PermCond (Sum.elim c (Sum.elim c2 c3 ∘ finSumFinEquiv.symm) ∘ finSumFinEquiv.symm)
+    (Sum.elim (Sum.elim c c2 ∘ finSumFinEquiv.symm) c3 ∘ finSumFinEquiv.symm)
+    (prodAssocMap n1 n2 n3) := by
   apply And.intro
   · simp only [prodAssocMap]
     change Function.Bijective (finCongr (by ring))
@@ -974,8 +974,8 @@ lemma prodAssocMap'_permCond {n1 n2 n3 : ℕ} {c : Fin n1 → S.C} {c2 : Fin n2 
 
 @[simp]
 lemma Pure.prodP_equivariant {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
-      (g : S.G) (p : Pure S c) (p1 : Pure S c1) :
-      prodP (g • p) (g • p1) = g • prodP p p1 := by
+    (g : S.G) (p : Pure S c) (p1 : Pure S c1) :
+    prodP (g • p) (g • p1) = g • prodP p p1 := by
   ext i
   obtain ⟨i, rfl⟩ := finSumFinEquiv.surjective i
   conv_rhs =>
@@ -999,8 +999,8 @@ lemma Pure.prodP_equivariant {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
 
 @[simp]
 lemma prodT_equivariant {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
-      (g : S.G) (t : S.Tensor c) (t1 : S.Tensor c1) :
-      prodT (g • t) (g • t1) = g • prodT t t1 := by
+    (g : S.G) (t : S.Tensor c) (t1 : S.Tensor c1) :
+    prodT (g • t) (g • t1) = g • prodT t t1 := by
   let P (t : S.Tensor c) := prodT (g • t) (g • t1) = g • prodT t t1
   change P t
   apply induction_on_pure

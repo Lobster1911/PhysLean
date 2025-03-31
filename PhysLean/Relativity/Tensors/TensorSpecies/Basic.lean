@@ -163,7 +163,7 @@ lemma castFin0ToField_tprod {c : Fin 0 → S.C}
 -/
 
 lemma contr_congr (c c' : S.C) (h : c = c') (x : S.FD.obj (Discrete.mk c))
-      (y : S.FD.obj (Discrete.mk (S.τ c))) :
+    (y : S.FD.obj (Discrete.mk (S.τ c))) :
     (S.contr.app { as := c }).hom (x ⊗ₜ[k] y) =
     (S.contr.app { as := c' }).hom
     ((S.FD.map (Discrete.eqToHom (by simp [h]))).hom x ⊗ₜ

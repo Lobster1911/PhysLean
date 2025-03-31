@@ -649,7 +649,7 @@ noncomputable def contrT {n : ℕ} {c : Fin (n + 1 + 1) → S.C} (i j : Fin (n +
 
 @[simp]
 lemma contrT_pure {n : ℕ} {c : Fin (n + 1 + 1) → S.C} (i j : Fin (n + 1 + 1))
-      (hij : i ≠ j ∧ c i = S.τ (c j)) (p : Pure S c) :
+    (hij : i ≠ j ∧ c i = S.τ (c j)) (p : Pure S c) :
     contrT i j hij p.toTensor = p.contrP i j hij := by
   simp only [contrT, Pure.toTensor]
   change _ = Pure.contrPMultilinear i j hij p
@@ -717,19 +717,19 @@ lemma contrT_symm {n : ℕ} {c : Fin (n + 1 + 1) → S.C}
     simp [P, hp, hr]
 
 lemma contrT_comm {n : ℕ} {c : Fin (n + 1 + 1 + 1 + 1) → S.C}
-      (i1 j1 : Fin (n + 1 + 1 + 1 + 1)) (i2 j2 : Fin (n + 1 + 1))
-      (hij1 : i1 ≠ j1 ∧ c i1 = S.τ (c j1))
-      (hij2 : i2 ≠ j2 ∧ c (dropPairEmb i1 j1 hij1.1 i2) = S.τ (c (dropPairEmb i1 j1 hij1.1 j2)))
-      (t : Tensor S c) :
-      let i2' := (dropPairEmb i1 j1 hij1.1 i2);
-      let j2' := (dropPairEmb i1 j1 hij1.1 j2);
-      have hi2j2' : i2' ≠ j2' := by simp [i2', j2', dropPairEmb, hij2];
-      let i1' := (dropPairEmbPre i2' j2' hi2j2' i1 (by simp [i2', j2']));
-      let j1' := (dropPairEmbPre i2' j2' hi2j2' j1 (by simp [i2', j2']));
-      contrT i2 j2 hij2 (contrT i1 j1 hij1 t) =
-      permT id (permCond_dropPairEmb_comm i1 j1 i2 j2 hij1.left hij2.left)
-        (contrT i1' j1' (by simp [i1', j1', i2', j2', hij1])
-        (contrT i2' j2' (by simp [i2', j2', hij2]) t)) := by
+    (i1 j1 : Fin (n + 1 + 1 + 1 + 1)) (i2 j2 : Fin (n + 1 + 1))
+    (hij1 : i1 ≠ j1 ∧ c i1 = S.τ (c j1))
+    (hij2 : i2 ≠ j2 ∧ c (dropPairEmb i1 j1 hij1.1 i2) = S.τ (c (dropPairEmb i1 j1 hij1.1 j2)))
+    (t : Tensor S c) :
+    let i2' := (dropPairEmb i1 j1 hij1.1 i2);
+    let j2' := (dropPairEmb i1 j1 hij1.1 j2);
+    have hi2j2' : i2' ≠ j2' := by simp [i2', j2', dropPairEmb, hij2];
+    let i1' := (dropPairEmbPre i2' j2' hi2j2' i1 (by simp [i2', j2']));
+    let j1' := (dropPairEmbPre i2' j2' hi2j2' j1 (by simp [i2', j2']));
+    contrT i2 j2 hij2 (contrT i1 j1 hij1 t) =
+    permT id (permCond_dropPairEmb_comm i1 j1 i2 j2 hij1.left hij2.left)
+      (contrT i1' j1' (by simp [i1', j1', i2', j2', hij1])
+      (contrT i2' j2' (by simp [i2', j2', hij2]) t)) := by
   let i2' := (dropPairEmb i1 j1 hij1.1 i2);
   let j2' := (dropPairEmb i1 j1 hij1.1 j2);
   let i1' := (dropPairEmbPre i2' j2' (by simp [i2', j2', dropPairEmb, hij2]) i1
