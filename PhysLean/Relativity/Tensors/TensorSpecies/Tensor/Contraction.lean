@@ -37,6 +37,7 @@ namespace Pure
 
 variable {n : ℕ} {c : Fin (n + 1 + 1) → S.C}
 
+/-- The embedding of `Fin n` into `Fin (n + 1 + 1)` with a hole at `i` and `j`. -/
 def dropPairEmb (i j : Fin (n + 1 + 1)) (hij : i ≠ j) : Fin n ↪o Fin (n + 1 + 1) :=
   (Finset.orderEmbOfFin {i, j}ᶜ
   (by rw [Finset.card_compl]; simp [Finset.card_pair hij]))
@@ -93,6 +94,8 @@ lemma snd_neq_dropPairEmb_pre (i j : Fin (n + 1 + 1)) (hij : i ≠ j) (m : Fin n
   nth_rewrite 2 [hn] at hi
   simp [- dropPairEmb_range] at hi
 
+/-- Given an `i j m : Fin (n + 1 + 1)` such that they are pairwise not equal, then
+  `dropPairEmbPre` gives the pre-image of `m` under `dropPairEm i j _`. -/
 def dropPairEmbPre (i j : Fin (n + 1 + 1)) (hij : i ≠ j) (m : Fin (n + 1 + 1))
     (hm : m ≠ i ∧ m ≠ j) : Fin n :=
     (Finset.orderIsoOfFin {i, j}ᶜ (by rw [Finset.card_compl]; simp [Finset.card_pair hij])).symm
@@ -212,6 +215,9 @@ lemma eq_or_exists_dropPairEmb
 
 -/
 
+/-- Given a bijection `Fin (n1 + 1 + 1) → Fin (n + 1 + 1))` and a pair `i j : Fin (n1 + 1 + 1)`,
+  then `dropPairOfMap i j _ σ _ : Fin n1 → Fin n` corressponds to the induced bijection
+  formed by dropping `i` and `j` in the source and their image in the target. -/
 def dropPairOfMap {n n1 : ℕ} (i j : Fin (n1 + 1 + 1)) (hij : i ≠ j)
     (σ : Fin (n1 + 1 + 1) → Fin (n + 1 + 1)) (hσ : Function.Bijective σ)
     (m : Fin n1) : Fin n :=
@@ -264,9 +270,13 @@ lemma permCond_dropPairOfMap {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
 
 -/
 
+/-- Given an ordered embedding `f : Fin m ↪o Fin n` and a pure tensor `p`, `dropEm f p` is the
+  tensor formed by dropping all parts of `p` not in the image of `f`. -/
 def dropEm {n : ℕ} {c : Fin n → S.C} {m : ℕ} (f : Fin m ↪o Fin n) (p : Pure S c) : Pure S (c ∘ f) :=
   fun i => p (f i)
 
+/-- Given `i j : Fin (n + 1 + 1)`, `c : Fin (n + 1 + 1) → S.C` and a pure tensor `p : Pure S c`,
+  `dropPair i j _ p` is the tensor formed by dropping the `i`th and `j`th parts of `p`. -/
 def dropPair (i j : Fin (n + 1 + 1)) (hij : i ≠ j) (p : Pure S c) :
     Pure S (c ∘ dropPairEmb i j hij) :=
   dropEm (dropPairEmb i j hij) p
@@ -362,6 +372,9 @@ lemma dropPair_permP {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
 
 -/
 
+/-- Given a pure tensor `p : Pure S c` and a `i j : Fin n`
+  corresponding to dual colors in `c`, `contrPCoeff i j _ p` is the
+  element of the underlying ring `k` formed by contracting `p i` and `p j`. -/
 noncomputable def contrPCoeff {n : ℕ} {c : Fin n → S.C}
     (i j : Fin n) (hij : i ≠ j ∧ c i = S.τ (c j)) (p : Pure S c) : k :=
     (S.contr.app (Discrete.mk (c i))) (p i ⊗ₜ ((S.FD.map (eqToHom (by simp [hij]))) (p j)))
@@ -550,6 +563,10 @@ lemma contrPCoeff_invariant {n : ℕ} {c : Fin n → S.C} {i j : Fin n}
 
 -/
 
+/-- For `c : Fin (n + 1 + 1) → S.C`, `i j : Fin (n + 1 + 1)` with dual color, and a pure tensor
+  `p : Pure S c`, `contrP i j _ p` is the tensor (not pure due to the `n = 0` case)
+  formed by contracting the `i`th index of `p`
+  with the `j`th index. -/
 noncomputable def contrP {n : ℕ} {c : Fin (n + 1 + 1) → S.C}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ c i = S.τ (c j)) (p : Pure S c) :
     S.Tensor (c ∘ dropPairEmb i j hij.1) :=
@@ -596,6 +613,7 @@ lemma contrP_symm {n : ℕ} {c : Fin (n + 1 + 1) → S.C}
 
 -/
 
+/-- The multi-linear map formed by contracting a pair of indices of pure tensors. -/
 noncomputable def contrPMultilinear {n : ℕ} {c : Fin (n + 1 + 1) → S.C}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ c i = S.τ (c j)) :
     MultilinearMap k (fun i => S.FD.obj (Discrete.mk (c i)))
@@ -620,6 +638,10 @@ end Pure
 
 open Pure
 
+/-- For `c : Fin (n + 1 + 1) → S.C`, `i j : Fin (n + 1 + 1)` with dual color, and a tensor
+  `t : Tensor S c`, `contrT i j _ t` is the tensor
+  formed by contracting the `i`th index of `t`
+  with the `j`th index. -/
 noncomputable def contrT {n : ℕ} {c : Fin (n + 1 + 1) → S.C} (i j : Fin (n + 1 + 1))
       (hij : i ≠ j ∧ c i = S.τ (c j)) :
     Tensor S c →ₗ[k] Tensor S (c ∘ dropPairEmb i j hij.1) :=

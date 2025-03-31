@@ -616,11 +616,17 @@ And its interaction with
 
 -/
 
+TODO "Change products of tensors to use `Fin.append` rather then
+  `Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm`."
+
+/-- The equivalence between `ComponentIdx (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm)` and
+  `Π (i : Fin n1 ⊕ Fin n2), Fin (S.repDim (Sum.elim c c1 i))`. -/
 def ComponentIdx.prodEquiv {n1 n2 : ℕ} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C} :
     ComponentIdx (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm) ≃
     Π (i : Fin n1 ⊕ Fin n2), Fin (S.repDim (Sum.elim c c1 i)) :=
   (Equiv.piCongr finSumFinEquiv (fun _ => finCongr (by simp))).symm
 
+/-- The product of two component indices. -/
 def ComponentIdx.prod {n1 n2 : ℕ} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
     (b : ComponentIdx c) (b1 : ComponentIdx c1) :
     ComponentIdx (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm) :=
@@ -642,6 +648,8 @@ lemma ComponentIdx.prod_apply_finSumFinEquiv {n1 n2 : ℕ} {c : Fin n1 → S.C} 
   | Sum.inr i =>
     rfl
 
+/-- The equivalence between pure tensors based on a product of lists of indices, and
+  the type `Π (i : Fin n1 ⊕ Fin n2), S.FD.obj (Discrete.mk ((Sum.elim c c1) i))`. -/
 def Pure.prodEquiv {n1 n2 : ℕ} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C} :
     Pure S (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm) ≃
     Π (i : Fin n1 ⊕ Fin n2), S.FD.obj (Discrete.mk ((Sum.elim c c1) i)) :=
@@ -649,6 +657,9 @@ def Pure.prodEquiv {n1 n2 : ℕ} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C} :
   (fun _ => ((Action.forget _ _).mapIso
     (S.FD.mapIso (Discrete.eqToIso (by simp)))).toLinearEquiv.toEquiv)).symm
 
+/-- Given two pure tensors `p1 : Pure S c` and `p2 : Pure S c`, `prodP p p2` is the tensor
+  product of those tensors returning an element in
+  `Pure S (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm)`. -/
 def Pure.prodP {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
     (p1 : Pure S c) (p2 : Pure S c1) : Pure S (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm) :=
   Pure.prodEquiv.symm fun | Sum.inl i => p1 i | Sum.inr i => p2 i
@@ -714,6 +725,8 @@ lemma Pure.prodP_basisVector {n n1 : ℕ} {c : Fin n → S.C} {c1 : Fin n1 → S
     · rw [ComponentIdx.prod_apply_finSumFinEquiv]
     · simp
 
+/-- The equivalence between the type `S.F.obj (OverColor.mk (Sum.elim c c1))` and the type
+  `S.Tensor (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm)`. -/
 noncomputable def prodEquiv {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C} :
     S.F.obj (OverColor.mk (Sum.elim c c1)) ≃ₗ[k] S.Tensor (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm) :=
   ((Action.forget _ _).mapIso (S.F.mapIso (OverColor.equivToIso finSumFinEquiv))).toLinearEquiv
@@ -732,6 +745,8 @@ lemma prodEquiv_symm_pure {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
   rw (transparency := .instances) [h1]
   rfl
 
+/-- The tensor product of two tensors as a bi-linear map from
+  `S.Tensor c` and `S.Tensor c1` to `S.Tensor (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm)`. -/
 noncomputable def prodT {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C} :
     S.Tensor c →ₗ[k] S.Tensor c1 →ₗ[k] S.Tensor (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm) := by
   refine LinearMap.mk₂ k ?_ ?_ ?_ ?_ ?_
@@ -747,7 +762,7 @@ noncomputable def prodT {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C} :
 
 lemma prodT_pure {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
     (t : Pure S c) (t1 : Pure S c1) :
-    prodT (t.toTensor) (t1.toTensor) = (Pure.prodP t t1).toTensor := by
+    (t.toTensor).prodT (t1.toTensor) = (Pure.prodP t t1).toTensor := by
   simp only [prodT, LinearMap.mk₂_apply]
   conv_lhs =>
     enter [2]
@@ -766,19 +781,22 @@ lemma prodT_pure {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
   | Sum.inr i =>
     rfl
 
-/--
+/-
 
 ## Product Maps
 
 These maps are used in permutations of tensors.
 -/
 
+/-- Given a map `σ : Fin n → Fin n'`, the induced map `Fin (n + n2) → Fin (n' + n2)`. -/
 def prodLeftMap (n2 : ℕ) (σ : Fin n → Fin n') : Fin (n + n2) → Fin (n' + n2) :=
     finSumFinEquiv ∘ Sum.map σ id ∘ finSumFinEquiv.symm
 
+/-- Given a map `σ : Fin n → Fin n'`, the induced map `Fin (n2 + n) → Fin (n2 + n')`. -/
 def prodRightMap (n2 : ℕ) (σ : Fin n → Fin n') : Fin (n2 + n) → Fin (n2 + n') :=
     finSumFinEquiv ∘ Sum.map id σ ∘ finSumFinEquiv.symm
 
+/-- The map between `Fin (n1 + n2 + n3)` and `Fin (n1 + (n2 + n3))` formed by casting. -/
 def prodAssocMap (n1 n2 n3 : ℕ) : Fin (n1 + n2 + n3) → Fin (n1 + (n2 + n3)) :=
     Fin.cast (Nat.add_assoc n1 n2 n3)
 
@@ -801,6 +819,7 @@ lemma prodAssocMap_natAdd {n1 n2 n3 : ℕ} (i : Fin (n3)) :
   simp only [prodAssocMap, finSumFinEquiv_apply_right, Fin.ext_iff, Fin.coe_cast, Fin.coe_natAdd]
   omega
 
+/-- The map between `Fin (n1 + (n2 + n3))` and `Fin (n1 + n2 + n3)` formed by casting. -/
 def prodAssocMap' (n1 n2 n3 : ℕ) : Fin (n1 + (n2 + n3)) → Fin (n1 + n2 + n3) :=
     Fin.cast (Nat.add_assoc n1 n2 n3).symm
 
@@ -823,6 +842,7 @@ lemma prodAssocMap'_natAdd_natAdd {n1 n2 n3 : ℕ} (i : Fin n3) :
   simp only [prodAssocMap', finSumFinEquiv_apply_right, Fin.ext_iff, Fin.coe_cast, Fin.coe_natAdd]
   omega
 
+/-- The map between `Fin (n1 + n2)` and `Fin (n2 + n1)` formed by swapping elements. -/
 def prodSwapMap (n1 n2 : ℕ) : Fin (n1 + n2) → Fin (n2 + n1) :=
     finSumFinEquiv ∘ Sum.swap ∘ finSumFinEquiv.symm
 
