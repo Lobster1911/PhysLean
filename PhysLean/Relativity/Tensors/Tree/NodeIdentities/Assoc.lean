@@ -29,25 +29,11 @@ lemma assoc_one_two_two {c1 c2 c3 : S.C} (t1 : S.Tensor ![c1])
     {t1 | μ ⊗ t2 | μ ν ⊗ t3 | ν σ}ᵀ = ({t1 | μ ⊗ (t2 | μ ν ⊗ t3 | ν σ)}ᵀ
     |> permT id (And.intro (Function.bijective_id) (fun i => by
       fin_cases i; rfl))) := by
-  rw [prodT_swap]
-  rw [contrT_permT]
-  conv_lhs =>
-    enter [2, 2]
-    rw [prodT_contrT_snd]
-  rw [contrT_permT]
-  rw [permT_permT]
-  conv_lhs =>
-    enter [2, 2, 2]
-    rw [prodT_swap]
-    rw [prodT_assoc t1 t2 t3]
-    rw [permT_permT]
+  rw [prodT_swap, contrT_permT, prodT_contrT_snd, contrT_permT, permT_permT]
+  rw [prodT_swap, prodT_assoc t1 t2 t3, permT_permT]
   rw [contrT_permT, contrT_permT, permT_permT]
   conv_rhs =>
-    rw [prodT_contrT_snd]
-    rw [contrT_permT]
-    rw [permT_permT]
-    rw [contrT_comm]
-    rw [permT_permT]
+    rw [prodT_contrT_snd, contrT_permT, permT_permT, contrT_comm, permT_permT]
   apply permT_congr
   · simp
     ext i
