@@ -5,6 +5,7 @@ Authors: Joseph Tooby-Smith
 -/
 import PhysLean.Relativity.Tensors.Tree.NodeIdentities.PermContr
 import PhysLean.Relativity.Lorentz.RealTensor.Basic
+import PhysLean.Relativity.Tensors.TensorSpecies.Tensor.FromConst
 /-!
 
 ## Metrics as real Lorentz tensors
@@ -31,14 +32,14 @@ open Fermion
 ## Definitions.
 
 -/
+open TensorSpecies
+open Tensor
 
 /-- The metric `ηᵢᵢ` as a complex Lorentz tensor. -/
-def coMetric (d : ℕ := 3) := (TensorTree.constTwoNodeE (realLorentzTensor d)
-  .down .down (Lorentz.preCoMetric d)).tensor
+def coMetric (d : ℕ := 3) : ℝT[d, .down, .down] := fromConstPair (Lorentz.preCoMetric d)
 
 /-- The metric `ηⁱⁱ` as a complex Lorentz tensor. -/
-def contrMetric (d : ℕ := 3) := (TensorTree.constTwoNodeE (realLorentzTensor d)
-  .up .up (Lorentz.preContrMetric d)).tensor
+def contrMetric (d : ℕ := 3) : ℝT[d, .up, .up] := fromConstPair (Lorentz.preContrMetric d)
 
 /-!
 
@@ -58,17 +59,6 @@ scoped[realLorentzTensor] notation "η" => @contrMetric
 
 -/
 
-/-- The definitional tensor node relation for `coMetric`. -/
-lemma tensorNode_coMetric {d : ℕ} : {η' d | μ ν}ᵀ.tensor =
-    (TensorTree.constTwoNodeE (realLorentzTensor d)
-    .down .down (Lorentz.preCoMetric d)).tensor := by
-  rfl
-
-/-- The definitional tensor node relation for `contrMetric`. -/
-lemma tensorNode_contrMetric : {η d | μ ν}ᵀ.tensor =
-    (TensorTree.constTwoNodeE (realLorentzTensor d)
-    .up .up (Lorentz.preContrMetric d)).tensor := by
-  rfl
 
 /-
 
@@ -77,8 +67,8 @@ lemma tensorNode_contrMetric : {η d | μ ν}ᵀ.tensor =
 -/
 
 /-- The tensor `coMetric` is invariant under the action of `LorentzGroup d`. -/
-lemma action_coMetric {d : ℕ} (g : LorentzGroup d) : {g •ₐ η' d | μ ν}ᵀ.tensor =
-    {η' d | μ ν}ᵀ.tensor := by
+lemma action_coMetric {d : ℕ} (g : LorentzGroup d) : {(g •ₐ η' d | μ ν)}ᵀ =
+    {η' d | μ ν}ᵀ := by
   rw [tensorNode_coMetric, constTwoNodeE]
   rw [← action_constTwoNode _ g]
   rfl

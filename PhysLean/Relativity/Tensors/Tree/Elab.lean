@@ -484,7 +484,7 @@ partial def syntaxFull (stx : Syntax) : TermElabM Term := do
   expression corresponding to a tensor tree. -/
 def elaborateTensorNode (stx : Syntax) : TermElabM Expr := do
   let tensorExpr ← elabTerm (← syntaxFull stx) none
-  println! (← syntaxFull stx)
+  -- println! (← syntaxFull stx)
   return tensorExpr
 
 /-- The tensor tree corresponding to a tensor expression. -/

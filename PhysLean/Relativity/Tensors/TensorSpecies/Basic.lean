@@ -23,11 +23,7 @@ open MonoidalCategory
 /-- The structure `TensorSpecies` contains the necessary structure needed to define
   a system of tensors with index notation. Examples of `TensorSpecies` include real Lorentz tensors,
   complex Lorentz tensors, and ordinary Euclidean tensors. -/
-structure TensorSpecies (k : Type) [CommRing k] where
-  /-- The symmetry group acting on these tensor e.g. the Lorentz group or SL(2,ℂ). -/
-  G : Type
-  /-- An instance of `G` as a group. -/
-  G_group : Group G
+structure TensorSpecies (k : Type) [CommRing k] (G : Type) [Group G] where
   /-- The colors of indices e.g. up or down. -/
   C : Type
   /-- A functor from `C` to `Rep k G` giving our building block representations.

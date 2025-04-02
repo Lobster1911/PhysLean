@@ -5,6 +5,7 @@ Authors: Joseph Tooby-Smith
 -/
 import PhysLean.Relativity.Lorentz.RealTensor.Metrics.Pre
 import PhysLean.Relativity.Lorentz.ComplexTensor.Basic
+import PhysLean.Relativity.Tensors.TensorSpecies.Tensor.Basic
 /-!
 
 ## Real Lorentz tensors
@@ -130,11 +131,11 @@ syntax (name := realLorentzTensorSyntax) "ℝT[" term,* "]" : term
 
 macro_rules
   | `(ℝT[$termDim:term, $term:term, $terms:term,*]) =>
-      `(((realLorentzTensor $termDim).F.obj (OverColor.mk (vecCons $term ![$terms,*]))))
+      `(((realLorentzTensor $termDim).Tensor (vecCons $term ![$terms,*])))
   | `(ℝT[$termDim:term, $term:term]) =>
-    `(((realLorentzTensor $termDim).F.obj (OverColor.mk (vecCons $term ![]))))
-  | `(ℝT[$termDim:term]) =>`(((realLorentzTensor $termDim).F.obj (OverColor.mk (vecEmpty))))
-  | `(ℝT[]) =>`(((realLorentzTensor 3).F.obj (OverColor.mk (vecEmpty))))
+    `(((realLorentzTensor $termDim).Tensor (vecCons $term ![])))
+  | `(ℝT[$termDim:term]) =>`(((realLorentzTensor $termDim).Tensor vecEmpty))
+  | `(ℝT[]) =>`(((realLorentzTensor 3).Tensor vecEmpty))
 
 set_option quotPrecheck false in
 /-- Notation for a real Lorentz tensor. -/
