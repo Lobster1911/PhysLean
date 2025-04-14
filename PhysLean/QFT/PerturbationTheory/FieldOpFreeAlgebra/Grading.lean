@@ -19,16 +19,18 @@ namespace FieldOpFreeAlgebra
 
 noncomputable section
 
+variable {ιin ιx ιout : Type}
+
 /-- The submodule of `FieldOpFreeAlgebra` spanned by lists of field statistic `f`. -/
-def statisticSubmodule (f : FieldStatistic) : Submodule ℂ 𝓕.FieldOpFreeAlgebra :=
+def statisticSubmodule (f : FieldStatistic) : Submodule ℂ (𝓕.FieldOpFreeAlgebra ιin ιx ιout) :=
   Submodule.span ℂ {a | ∃ φs, a = ofCrAnListF φs ∧ (𝓕 |>ₛ φs) = f}
 
-lemma ofCrAnListF_mem_statisticSubmodule_of (φs : List 𝓕.CrAnFieldOp) (f : FieldStatistic)
-    (h : (𝓕 |>ₛ φs) = f) :
+lemma ofCrAnListF_mem_statisticSubmodule_of (φs : List (𝓕.CrAnFieldOp ιin ιx ιout))
+    (f : FieldStatistic) (h : (𝓕 |>ₛ φs) = f) :
     ofCrAnListF φs ∈ statisticSubmodule f := by
   refine Submodule.mem_span.mpr fun _ a => a ⟨φs, ⟨rfl, h⟩⟩
 
-lemma ofCrAnListF_bosonic_or_fermionic (φs : List 𝓕.CrAnFieldOp) :
+lemma ofCrAnListF_bosonic_or_fermionic (φs : List (𝓕.CrAnFieldOp ιin ιx ιout)) :
     ofCrAnListF φs ∈ statisticSubmodule bosonic ∨
     ofCrAnListF φs ∈ statisticSubmodule fermionic := by
   by_cases h : (𝓕 |>ₛ φs) = bosonic
@@ -37,13 +39,13 @@ lemma ofCrAnListF_bosonic_or_fermionic (φs : List 𝓕.CrAnFieldOp) :
   · right
     exact ofCrAnListF_mem_statisticSubmodule_of φs fermionic (by simpa using h)
 
-lemma ofCrAnOpF_bosonic_or_fermionic (φ : 𝓕.CrAnFieldOp) :
+lemma ofCrAnOpF_bosonic_or_fermionic (φ : 𝓕.CrAnFieldOp ιin ιx ιout) :
     ofCrAnOpF φ ∈ statisticSubmodule bosonic ∨ ofCrAnOpF φ ∈ statisticSubmodule fermionic := by
   rw [← ofCrAnListF_singleton]
   exact ofCrAnListF_bosonic_or_fermionic [φ]
 
 /-- The projection of an element of `FieldOpFreeAlgebra` onto it's bosonic part. -/
-def bosonicProjF : 𝓕.FieldOpFreeAlgebra →ₗ[ℂ] statisticSubmodule (𝓕 := 𝓕) bosonic :=
+def bosonicProjF : 𝓕.FieldOpFreeAlgebra ιin ιx ιout →ₗ[ℂ] statisticSubmodule (𝓕 := 𝓕) bosonic :=
   Basis.constr ofCrAnListFBasis ℂ fun φs =>
   if h : (𝓕 |>ₛ φs) = bosonic then
     ⟨ofCrAnListF φs, Submodule.mem_span.mpr fun _ a => a ⟨φs, ⟨rfl, h⟩⟩⟩

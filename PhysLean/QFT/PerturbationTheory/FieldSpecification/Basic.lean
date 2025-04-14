@@ -96,19 +96,20 @@ As an example, if `f` corresponds to a Weyl-fermion field, then
   annihilation operator `a†(p, s)`.
 
 -/
-inductive FieldOp (𝓕 : FieldSpecification) where
-  | inAsymp : (Σ f, 𝓕.AsymptoticLabel f) × (Momentum 3) → 𝓕.FieldOp
-  | position : (Σ f, 𝓕.PositionLabel f) × SpaceTime → 𝓕.FieldOp
-  | outAsymp : (Σ f, 𝓕.AsymptoticLabel f) × (Momentum 3) → 𝓕.FieldOp
+inductive FieldOp (𝓕 : FieldSpecification) (ιin ιx ιout : Type) where
+  | inAsymp : (Σ f, 𝓕.AsymptoticLabel f) × ιin → 𝓕.FieldOp ιin ιx ιout
+  | position : (Σ f, 𝓕.PositionLabel f) × ιx → 𝓕.FieldOp ιin ιx ιout
+  | outAsymp : (Σ f, 𝓕.AsymptoticLabel f) × ιout → 𝓕.FieldOp ιin ιx ιout
 
+variable {ιin ιx ιout : Type}
 /-- The bool on `FieldOp` which is true only for position field operator. -/
-def statesIsPosition : 𝓕.FieldOp → Bool
+def statesIsPosition : 𝓕.FieldOp ιin ιx ιout → Bool
   | FieldOp.position _ => true
   | _ => false
 
 /-- For a field specification `𝓕`, `𝓕.fieldOpToField` is defined to take field operators
   to their underlying field. -/
-def fieldOpToField : 𝓕.FieldOp → 𝓕.Field
+def fieldOpToField : 𝓕.FieldOp ιin ιx ιout → 𝓕.Field
   | FieldOp.inAsymp (f, _) => f.1
   | FieldOp.position (f, _) => f.1
   | FieldOp.outAsymp (f, _) => f.1
@@ -123,7 +124,7 @@ def fieldOpToField : 𝓕.FieldOp → 𝓕.Field
   the list `φs`.
 - For a function `f : Fin n → 𝓕.FieldOp` and a finite set `a` of `Fin n`, `𝓕 |>ₛ ⟨f, a⟩` is the
   product of `fieldOpStatistic (f i)` for all `i ∈ a`. -/
-def fieldOpStatistic : 𝓕.FieldOp → FieldStatistic := 𝓕.statistic ∘ 𝓕.fieldOpToField
+def fieldOpStatistic : 𝓕.FieldOp ιin ιx ιout → FieldStatistic := 𝓕.statistic ∘ 𝓕.fieldOpToField
 
 @[inherit_doc fieldOpStatistic]
 scoped[FieldSpecification] notation 𝓕 "|>ₛ" φ => fieldOpStatistic 𝓕 φ

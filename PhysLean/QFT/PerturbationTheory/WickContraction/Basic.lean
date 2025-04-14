@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Joseph Tooby-Smith
 -/
 import PhysLean.QFT.PerturbationTheory.FieldSpecification.Basic
+import PhysLean.QFT.YukawaTheory.Basic
 /-!
 
 # Wick contractions
@@ -517,19 +518,31 @@ lemma prod_finset_eq_mul_fst_snd (c : WickContraction n) (a : c.1)
   rw [← (c.contractEquivFinTwo a).symm.prod_comp]
   simp [contractEquivFinTwo]
 
+variable {ιin ιx ιout : Type}
 /-- For a field specification `𝓕`, `φs` a list of `𝓕.FieldOp` and a Wick contraction
   `φsΛ` of `φs`, the Wick contraction `φsΛ` is said to be `GradingCompliant` if
   for every pair in `φsΛ` the contracted fields are either both `fermionic` or both `bosonic`.
   In other words, in a `GradingCompliant` Wick contraction if
   no contracted pairs occur between `fermionic` and `bosonic` fields. -/
-def GradingCompliant (φs : List 𝓕.FieldOp) (φsΛ : WickContraction φs.length) :=
+def GradingCompliant (φs : List (𝓕.FieldOp ιin ιx ιout)) (φsΛ : WickContraction φs.length) :=
   ∀ (a : φsΛ.1), (𝓕 |>ₛ φs[φsΛ.fstFieldOfContract a]) = (𝓕 |>ₛ φs[φsΛ.sndFieldOfContract a])
 
-lemma gradingCompliant_congr {φs φs' : List 𝓕.FieldOp} (h : φs = φs')
+lemma gradingCompliant_congr {φs φs' : List (𝓕.FieldOp ιin ιx ιout)} (h : φs = φs')
     (φsΛ : WickContraction φs.length) :
     GradingCompliant φs φsΛ ↔ GradingCompliant φs' (congr (by simp [h]) φsΛ) := by
   subst h
   rfl
+
+instance  (φs : List (𝓕.FieldOp ιin ιx ιout)) (φsΛ : WickContraction φs.length) :
+    Decidable (GradingCompliant φs φsΛ) := Fintype.decidableForallFintype
+
+example :
+    let φs : List (YukawaTheory.fieldSpecification.FieldOp ℕ ℕ ℕ) :=
+      [.position (⟨YukawaTheory.Fields.scalar, ()⟩, 0),
+      .position (⟨YukawaTheory.Fields.fermion, (0, 2)⟩, 1),
+      .position (⟨YukawaTheory.Fields.fermion, (0, 2)⟩, 2)]
+    GradingCompliant φs ⟨{{⟨1, by simp⟩,⟨2, by simp⟩}}, by simp⟩ := by
+  with_unfolding_all decide
 
 /-- An equivalence from the sigma type `(a : c.1) × a` to the subtype of `Fin n` consisting of
   those positions which are contracted. -/

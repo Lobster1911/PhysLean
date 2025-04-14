@@ -33,24 +33,24 @@ In this module in addition to defining `CrAnFieldOp` we also define some maps:
 -/
 namespace FieldSpecification
 variable (𝓕 : FieldSpecification)
-
+variable {ιin ιx ιout : Type}
 /-- To each field operator the specification of the type of creation and annihilation parts.
   For asymptotic states there is only one allowed part, whilst for position
   field operator there is two. -/
-def fieldOpToCrAnType : 𝓕.FieldOp → Type
+def fieldOpToCrAnType : 𝓕.FieldOp ιin ιx ιout → Type
   | FieldOp.inAsymp _ => Unit
   | FieldOp.position _ => CreateAnnihilate
   | FieldOp.outAsymp _ => Unit
 
 /-- The instance of a finite type on `𝓕.fieldOpToCreateAnnihilateType i`. -/
-instance : ∀ i, Fintype (𝓕.fieldOpToCrAnType i) := fun i =>
+instance : ∀ (i : 𝓕.FieldOp ιin ιx ιout), Fintype (𝓕.fieldOpToCrAnType i) := fun i =>
   match i with
   | FieldOp.inAsymp _ => inferInstanceAs (Fintype Unit)
   | FieldOp.position _ => inferInstanceAs (Fintype CreateAnnihilate)
   | FieldOp.outAsymp _ => inferInstanceAs (Fintype Unit)
 
 /-- The instance of a decidable equality on `𝓕.fieldOpToCreateAnnihilateType i`. -/
-instance : ∀ i, DecidableEq (𝓕.fieldOpToCrAnType i) := fun i =>
+instance : ∀ (i : 𝓕.FieldOp ιin ιx ιout), DecidableEq (𝓕.fieldOpToCrAnType i) := fun i =>
   match i with
   | FieldOp.inAsymp _ => inferInstanceAs (DecidableEq Unit)
   | FieldOp.position _ => inferInstanceAs (DecidableEq CreateAnnihilate)
@@ -58,7 +58,7 @@ instance : ∀ i, DecidableEq (𝓕.fieldOpToCrAnType i) := fun i =>
 
 /-- The equivalence between `𝓕.fieldOpToCreateAnnihilateType i` and
   `𝓕.fieldOpToCreateAnnihilateType j` from an equality `i = j`. -/
-def fieldOpToCreateAnnihilateTypeCongr : {i j : 𝓕.FieldOp} → i = j →
+def fieldOpToCreateAnnihilateTypeCongr : {i j : 𝓕.FieldOp ιin ιx ιout} → i = j →
     𝓕.fieldOpToCrAnType i ≃ 𝓕.fieldOpToCrAnType j
   | _, _, rfl => Equiv.refl _
 
@@ -91,13 +91,13 @@ As an example, if `f` corresponds to a Weyl-fermion field, it would contribute
 - For each spin `s`, element corresponding to an outgoing asymptotic operator: `a†(p, s)`.
 
 -/
-def CrAnFieldOp : Type := Σ (s : 𝓕.FieldOp), 𝓕.fieldOpToCrAnType s
+def CrAnFieldOp (ιin ιx ιout : Type) : Type := Σ (s : 𝓕.FieldOp ιin ιx ιout), 𝓕.fieldOpToCrAnType s
 
 /-- The map from creation and annihilation field operator to their underlying states. -/
-def crAnFieldOpToFieldOp : 𝓕.CrAnFieldOp → 𝓕.FieldOp := Sigma.fst
+def crAnFieldOpToFieldOp : 𝓕.CrAnFieldOp ιin ιx ιout → 𝓕.FieldOp ιin ιx ιout := Sigma.fst
 
 @[simp]
-lemma crAnFieldOpToFieldOp_prod (s : 𝓕.FieldOp) (t : 𝓕.fieldOpToCrAnType s) :
+lemma crAnFieldOpToFieldOp_prod (s : 𝓕.FieldOp ιin ιx ιout) (t : 𝓕.fieldOpToCrAnType s) :
     𝓕.crAnFieldOpToFieldOp ⟨s, t⟩ = s := rfl
 
 /-- For a field specification `𝓕`, `𝓕.crAnFieldOpToCreateAnnihilate` is the map from
@@ -107,7 +107,7 @@ lemma crAnFieldOpToFieldOp_prod (s : 𝓕.FieldOp) (t : 𝓕.fieldOpToCrAnType s
 
 otherwise it takes `φ` to `annihilate`.
 -/
-def crAnFieldOpToCreateAnnihilate : 𝓕.CrAnFieldOp → CreateAnnihilate
+def crAnFieldOpToCreateAnnihilate : 𝓕.CrAnFieldOp ιin ιx ιout → CreateAnnihilate
   | ⟨FieldOp.inAsymp _, _⟩ => CreateAnnihilate.create
   | ⟨FieldOp.position _, CreateAnnihilate.create⟩ => CreateAnnihilate.create
   | ⟨FieldOp.position _, CreateAnnihilate.annihilate⟩ => CreateAnnihilate.annihilate
@@ -122,7 +122,7 @@ def crAnFieldOpToCreateAnnihilate : 𝓕.CrAnFieldOp → CreateAnnihilate
   - For `φs` a list of `𝓕.CrAnFieldOp`, `𝓕 |>ₛ φs` is the product of `crAnStatistics φ` over
     the list `φs`.
 -/
-def crAnStatistics : 𝓕.CrAnFieldOp → FieldStatistic :=
+def crAnStatistics : 𝓕.CrAnFieldOp ιin ιx ιout → FieldStatistic :=
   𝓕.fieldOpStatistic ∘ 𝓕.crAnFieldOpToFieldOp
 
 @[inherit_doc crAnStatistics]
