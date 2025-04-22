@@ -1,3 +1,4 @@
+import ClassicalMechanics.Kinematics.Definitions
 import PhysLean.Kinematics.Definitions
 import Mathlib.Tactic
 
