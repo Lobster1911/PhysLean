@@ -10,7 +10,7 @@ import PhysLean.QFT.AnomalyCancellation.Basic
 We define the anomaly cancellation conditions for a pure U(1) gauge theory with `n` fermions.
 
 -/
-universe v u
+
 open Nat
 
 open Finset
@@ -82,6 +82,7 @@ end PureU1
 /-- The ACC system for a pure $U(1)$ gauge theory with $n$ fermions. -/
 @[simps!]
 def PureU1 (n : ℕ) : ACCSystem where
+  numberCharges := n
   numberLinear := 1
   linearACCs := fun i =>
     match i with

@@ -54,12 +54,10 @@ def contrMetric : 𝟙_ (Rep ℂ SL(2,ℂ)) ⟶ complexContr ⊗ complexContr wh
   comm M := by
     refine ModuleCat.hom_ext ?_
     refine LinearMap.ext fun x : ℂ => ?_
-    simp only [Action.instMonoidalCategory_tensorObj_V, Action.instMonoidalCategory_tensorUnit_V,
-      Action.tensorUnit_ρ, CategoryTheory.Category.id_comp, Action.tensor_ρ, ModuleCat.hom_comp,
-      Function.comp_apply]
+    simp only [ModuleCat.hom_comp]
     change x • contrMetricVal =
       (TensorProduct.map (complexContr.ρ M) (complexContr.ρ M)) (x • contrMetricVal)
-    simp only [Action.instMonoidalCategory_tensorObj_V, _root_.map_smul]
+    simp only [map_smul]
     apply congrArg
     simp only [contrMetricVal]
     rw [contrContrToMatrix_ρ_symm]
@@ -106,18 +104,16 @@ def coMetric : 𝟙_ (Rep ℂ SL(2,ℂ)) ⟶ complexCo ⊗ complexCo where
   comm M := by
     refine ModuleCat.hom_ext ?_
     refine LinearMap.ext fun x : ℂ => ?_
-    simp only [Action.instMonoidalCategory_tensorObj_V, Action.instMonoidalCategory_tensorUnit_V,
-      Action.tensorUnit_ρ, CategoryTheory.Category.id_comp, Action.tensor_ρ, ModuleCat.hom_comp,
-      Function.comp_apply]
+    simp only [ModuleCat.hom_comp]
     change x • coMetricVal =
       (TensorProduct.map (complexCo.ρ M) (complexCo.ρ M)) (x • coMetricVal)
-    simp only [Action.instMonoidalCategory_tensorObj_V, _root_.map_smul]
+    simp only [map_smul]
     apply congrArg
     simp only [coMetricVal]
     rw [coCoToMatrix_ρ_symm]
     apply congrArg
     rw [LorentzGroup.toComplex_inv]
-    simp only [lorentzGroupIsGroup_inv, SL2C.toLorentzGroup_apply_coe,
+    simp only [LorentzGroup.inv_eq_dual, SL2C.toLorentzGroup_apply_coe,
       LorentzGroup.toComplex_transpose_mul_minkowskiMatrix_mul_self]
 
 lemma coMetric_apply_one : coMetric.hom (1 : ℂ) = coMetricVal := by

@@ -11,8 +11,6 @@ import Mathlib.RepresentationTheory.Basic
 We define the group of permutations for the SM charges with RHN.
 -/
 
-universe v u
-
 open Nat
 open Finset
 
@@ -49,7 +47,8 @@ def repCharges {n : ℕ} : Representation ℚ (PermGroup n) (SMνCharges n).Char
     intro S
     rw [charges_eq_toSpecies_eq]
     intro i
-    simp only [chargeMap_apply, Pi.mul_apply, Pi.inv_apply, Equiv.Perm.coe_mul, LinearMap.mul_apply]
+    simp only [chargeMap_apply, Pi.mul_apply, Pi.inv_apply, Equiv.Perm.coe_mul,
+      Module.End.mul_apply]
     repeat erw [toSMSpecies_toSpecies_inv]
     rfl
   map_one' := by

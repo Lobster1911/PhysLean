@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Joseph Tooby-Smith
 -/
 import PhysLean.QFT.PerturbationTheory.WickContraction.Sign.Basic
+import PhysLean.QFT.PerturbationTheory.WickContraction.InsertAndContract
 
 /-!
 
@@ -192,7 +193,7 @@ lemma signFinset_insertAndContract_some (φ : 𝓕.FieldOp) (φs : List 𝓕.Fie
       simp only [and_congr_right_iff]
       intro h1 h2
       simp only [ne_eq, hkj, not_false_eq_true, insertAndContract_some_succAbove_getDual?_eq_option,
-        Nat.succ_eq_add_one, Option.map_eq_none', Option.isSome_map']
+        Nat.succ_eq_add_one, Option.map_eq_none_iff, Option.isSome_map]
       conv_lhs =>
         rhs
         enter [h]
@@ -471,7 +472,8 @@ lemma stat_signFinset_insert_some_self_fst
       omega
       exact Fin.succAbove_right_injective
     · simp only [Nat.succ_eq_add_one, ne_eq, h, not_false_eq_true,
-      insertAndContract_some_succAbove_getDual?_eq_option, Option.map_eq_none', Option.isSome_map']
+        insertAndContract_some_succAbove_getDual?_eq_option, Option.map_eq_none_iff,
+        Option.isSome_map]
       rw [Fin.lt_def, Fin.lt_def]
       simp only [Fin.coe_cast, Fin.val_fin_lt]
       apply Iff.intro
@@ -547,7 +549,8 @@ lemma stat_signFinset_insert_some_self_snd (φ : 𝓕.FieldOp) (φs : List 𝓕.
       omega
       exact Fin.succAbove_right_injective
     · simp only [Nat.succ_eq_add_one, ne_eq, h, not_false_eq_true,
-      insertAndContract_some_succAbove_getDual?_eq_option, Option.map_eq_none', Option.isSome_map']
+        insertAndContract_some_succAbove_getDual?_eq_option, Option.map_eq_none_iff,
+        Option.isSome_map]
       rw [Fin.lt_def, Fin.lt_def]
       simp only [Fin.coe_cast, Fin.val_fin_lt]
       apply Iff.intro

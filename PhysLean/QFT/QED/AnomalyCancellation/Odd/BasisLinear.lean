@@ -11,7 +11,6 @@ import PhysLean.QFT.QED.AnomalyCancellation.VectorLike
 We give a basis of `LinSols` in the odd case. This basis has the special property
 that splits into two planes on which every point is a solution to the ACCs.
 -/
-universe v u
 
 open Nat
 open Finset
@@ -420,11 +419,11 @@ lemma P!_oddShiftSnd (f : Fin n → ℚ) (j : Fin n) : P! f (oddShiftSnd j) = - 
     exact Rat.mul_zero (f k)
   · simp
 
-lemma P_oddMid (f : Fin n → ℚ) : P f (oddMid) = 0 := by
+lemma P_oddMid (f : Fin n → ℚ) : P f oddMid = 0 := by
   rw [P, sum_of_charges]
   simp [HSMul.hSMul, SMul.smul, basis_on_oddMid]
 
-lemma P!_oddShiftZero (f : Fin n → ℚ) : P! f (oddShiftZero) = 0 := by
+lemma P!_oddShiftZero (f : Fin n → ℚ) : P! f oddShiftZero = 0 := by
   rw [P!, sum_of_charges]
   simp [HSMul.hSMul, SMul.smul, basis!_on_oddShiftZero]
 
@@ -444,7 +443,7 @@ lemma Pa_oddShiftShiftFst (f g : Fin n.succ → ℚ) (j : Fin n) :
   rw [oddShiftShiftFst_eq_oddShiftFst_castSucc]
   rw [P_oddFst, P!_oddShiftFst]
 
-lemma Pa_oddShiftShiftMid (f g : Fin n.succ → ℚ) : Pa f g (oddShiftShiftMid) = g (Fin.last n) := by
+lemma Pa_oddShiftShiftMid (f g : Fin n.succ → ℚ) : Pa f g oddShiftShiftMid = g (Fin.last n) := by
   rw [Pa]
   simp only [ACCSystemCharges.chargesAddCommMonoid_add]
   nth_rewrite 1 [oddShiftShiftMid_eq_oddMid]
@@ -674,7 +673,7 @@ noncomputable def basisaAsBasis :
 
 lemma span_basis (S : (PureU1 (2 * n.succ + 1)).LinSols) :
     ∃ (g f : Fin n.succ → ℚ), S.val = P g + P! f := by
-  have h := (mem_span_range_iff_exists_fun ℚ).mp (Basis.mem_span basisaAsBasis S)
+  have h := (Submodule.mem_span_range_iff_exists_fun ℚ).mp (Basis.mem_span basisaAsBasis S)
   obtain ⟨f, hf⟩ := h
   simp only [succ_eq_add_one, basisaAsBasis, coe_basisOfLinearIndependentOfCardEqFinrank,
     Fintype.sum_sum_type] at hf
@@ -693,7 +692,7 @@ lemma span_basis_swap! {S : (PureU1 (2 * n.succ + 1)).LinSols} (j : Fin n.succ)
     (S.val (oddShiftSnd j) - S.val (oddShiftFst j)) • basis!AsCharges j ∧ g' = g := by
   let X := P! f + (S.val (oddShiftSnd j) - S.val (oddShiftFst j)) • basis!AsCharges j
   have hf : P! f ∈ Submodule.span ℚ (Set.range basis!AsCharges) := by
-    rw [(mem_span_range_iff_exists_fun ℚ)]
+    rw [(Submodule.mem_span_range_iff_exists_fun ℚ)]
     use f
     rfl
   have hP : (S.val (oddShiftSnd j) - S.val (oddShiftFst j)) • basis!AsCharges j ∈
@@ -706,7 +705,7 @@ lemma span_basis_swap! {S : (PureU1 (2 * n.succ + 1)).LinSols} (j : Fin n.succ)
     apply Submodule.add_mem
     exact hf
     exact hP
-  have hXsum := (mem_span_range_iff_exists_fun ℚ).mp hX
+  have hXsum := (Submodule.mem_span_range_iff_exists_fun ℚ).mp hX
   obtain ⟨f', hf'⟩ := hXsum
   use g
   use f'

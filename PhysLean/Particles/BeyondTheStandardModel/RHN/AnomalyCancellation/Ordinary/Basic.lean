@@ -11,7 +11,6 @@ import PhysLean.QFT.AnomalyCancellation.GroupActions
 We define the ACC system for the Standard Model (without hypercharge) with right-handed neutrinos.
 -/
 
-universe v u
 namespace SMRHN
 open SMνCharges
 open SMνACCs
@@ -20,6 +19,7 @@ open BigOperators
 /-- The ACC system for the SM plus RHN. -/
 @[simps!]
 def SM (n : ℕ) : ACCSystem where
+  toACCSystemCharges := SMνCharges n
   numberLinear := 3
   linearACCs := fun i =>
     match i with

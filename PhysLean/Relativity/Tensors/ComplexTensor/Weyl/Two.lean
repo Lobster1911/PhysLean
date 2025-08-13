@@ -3,8 +3,7 @@ Copyright (c) 2024 Joseph Tooby-Smith. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Joseph Tooby-Smith
 -/
-import PhysLean.Relativity.Tensors.ComplexTensor.Weyl.Contraction
-import Mathlib.LinearAlgebra.TensorProduct.Matrix
+import PhysLean.Relativity.Tensors.ComplexTensor.Weyl.Basic
 /-!
 
 # Tensor product of two Weyl fermion
@@ -35,8 +34,8 @@ def leftLeftToMatrix : (leftHanded ⊗ leftHanded).V ≃ₗ[ℂ] Matrix (Fin 2) 
 /-- Expanding `leftLeftToMatrix` in terms of the standard basis. -/
 lemma leftLeftToMatrix_symm_expand_tmul (M : Matrix (Fin 2) (Fin 2) ℂ) :
     leftLeftToMatrix.symm M = ∑ i, ∑ j, M i j • (leftBasis i ⊗ₜ[ℂ] leftBasis j) := by
-  simp only [Action.instMonoidalCategory_tensorObj_V, leftLeftToMatrix,
-    LinearEquiv.trans_symm, LinearEquiv.trans_apply, Basis.repr_symm_apply]
+  simp only [leftLeftToMatrix, LinearEquiv.trans_symm, LinearEquiv.trans_apply,
+    Basis.repr_symm_apply]
   rw [Finsupp.linearCombination_apply_of_mem_supported ℂ (s := Finset.univ)]
   · rw [Fintype.sum_prod_type]
     refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
@@ -55,8 +54,8 @@ def altLeftaltLeftToMatrix : (altLeftHanded ⊗ altLeftHanded).V ≃ₗ[ℂ] Mat
 /-- Expanding `altLeftaltLeftToMatrix` in terms of the standard basis. -/
 lemma altLeftaltLeftToMatrix_symm_expand_tmul (M : Matrix (Fin 2) (Fin 2) ℂ) :
     altLeftaltLeftToMatrix.symm M = ∑ i, ∑ j, M i j • (altLeftBasis i ⊗ₜ[ℂ] altLeftBasis j) := by
-  simp only [Action.instMonoidalCategory_tensorObj_V, altLeftaltLeftToMatrix,
-    LinearEquiv.trans_symm, LinearEquiv.trans_apply, Basis.repr_symm_apply]
+  simp only [altLeftaltLeftToMatrix, LinearEquiv.trans_symm, LinearEquiv.trans_apply,
+    Basis.repr_symm_apply]
   rw [Finsupp.linearCombination_apply_of_mem_supported ℂ (s := Finset.univ)]
   · rw [Fintype.sum_prod_type]
     refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
@@ -73,8 +72,8 @@ def leftAltLeftToMatrix : (leftHanded ⊗ altLeftHanded).V ≃ₗ[ℂ] Matrix (F
 /-- Expanding `leftAltLeftToMatrix` in terms of the standard basis. -/
 lemma leftAltLeftToMatrix_symm_expand_tmul (M : Matrix (Fin 2) (Fin 2) ℂ) :
     leftAltLeftToMatrix.symm M = ∑ i, ∑ j, M i j • (leftBasis i ⊗ₜ[ℂ] altLeftBasis j) := by
-  simp only [Action.instMonoidalCategory_tensorObj_V, leftAltLeftToMatrix,
-    LinearEquiv.trans_symm, LinearEquiv.trans_apply, Basis.repr_symm_apply]
+  simp only [leftAltLeftToMatrix, LinearEquiv.trans_symm, LinearEquiv.trans_apply,
+    Basis.repr_symm_apply]
   rw [Finsupp.linearCombination_apply_of_mem_supported ℂ (s := Finset.univ)]
   · rw [Fintype.sum_prod_type]
     refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
@@ -91,8 +90,8 @@ def altLeftLeftToMatrix : (altLeftHanded ⊗ leftHanded).V ≃ₗ[ℂ] Matrix (F
 /-- Expanding `altLeftLeftToMatrix` in terms of the standard basis. -/
 lemma altLeftLeftToMatrix_symm_expand_tmul (M : Matrix (Fin 2) (Fin 2) ℂ) :
     altLeftLeftToMatrix.symm M = ∑ i, ∑ j, M i j • (altLeftBasis i ⊗ₜ[ℂ] leftBasis j) := by
-  simp only [Action.instMonoidalCategory_tensorObj_V, altLeftLeftToMatrix,
-    LinearEquiv.trans_symm, LinearEquiv.trans_apply, Basis.repr_symm_apply]
+  simp only [altLeftLeftToMatrix, LinearEquiv.trans_symm, LinearEquiv.trans_apply,
+    Basis.repr_symm_apply]
   rw [Finsupp.linearCombination_apply_of_mem_supported ℂ (s := Finset.univ)]
   · rw [Fintype.sum_prod_type]
     refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
@@ -109,8 +108,8 @@ def rightRightToMatrix : (rightHanded ⊗ rightHanded).V ≃ₗ[ℂ] Matrix (Fin
 /-- Expanding `rightRightToMatrix` in terms of the standard basis. -/
 lemma rightRightToMatrix_symm_expand_tmul (M : Matrix (Fin 2) (Fin 2) ℂ) :
     rightRightToMatrix.symm M = ∑ i, ∑ j, M i j • (rightBasis i ⊗ₜ[ℂ] rightBasis j) := by
-  simp only [Action.instMonoidalCategory_tensorObj_V, rightRightToMatrix,
-    LinearEquiv.trans_symm, LinearEquiv.trans_apply, Basis.repr_symm_apply]
+  simp only [rightRightToMatrix, LinearEquiv.trans_symm, LinearEquiv.trans_apply,
+    Basis.repr_symm_apply]
   rw [Finsupp.linearCombination_apply_of_mem_supported ℂ (s := Finset.univ)]
   · rw [Fintype.sum_prod_type]
     refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
@@ -128,8 +127,8 @@ def altRightAltRightToMatrix : (altRightHanded ⊗ altRightHanded).V ≃ₗ[ℂ]
 lemma altRightAltRightToMatrix_symm_expand_tmul (M : Matrix (Fin 2) (Fin 2) ℂ) :
     altRightAltRightToMatrix.symm M =
     ∑ i, ∑ j, M i j • (altRightBasis i ⊗ₜ[ℂ] altRightBasis j) := by
-  simp only [Action.instMonoidalCategory_tensorObj_V, altRightAltRightToMatrix,
-    LinearEquiv.trans_symm, LinearEquiv.trans_apply, Basis.repr_symm_apply]
+  simp only [altRightAltRightToMatrix, LinearEquiv.trans_symm, LinearEquiv.trans_apply,
+    Basis.repr_symm_apply]
   rw [Finsupp.linearCombination_apply_of_mem_supported ℂ (s := Finset.univ)]
   · rw [Fintype.sum_prod_type]
     refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
@@ -146,8 +145,8 @@ def rightAltRightToMatrix : (rightHanded ⊗ altRightHanded).V ≃ₗ[ℂ] Matri
 /-- Expanding `rightAltRightToMatrix` in terms of the standard basis. -/
 lemma rightAltRightToMatrix_symm_expand_tmul (M : Matrix (Fin 2) (Fin 2) ℂ) :
     rightAltRightToMatrix.symm M = ∑ i, ∑ j, M i j • (rightBasis i ⊗ₜ[ℂ] altRightBasis j) := by
-  simp only [Action.instMonoidalCategory_tensorObj_V, rightAltRightToMatrix, LinearEquiv.trans_symm,
-    LinearEquiv.trans_apply, Basis.repr_symm_apply]
+  simp only [rightAltRightToMatrix, LinearEquiv.trans_symm, LinearEquiv.trans_apply,
+    Basis.repr_symm_apply]
   rw [Finsupp.linearCombination_apply_of_mem_supported ℂ (s := Finset.univ)]
   · rw [Fintype.sum_prod_type]
     refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
@@ -164,8 +163,8 @@ def altRightRightToMatrix : (altRightHanded ⊗ rightHanded).V ≃ₗ[ℂ] Matri
 /-- Expanding `altRightRightToMatrix` in terms of the standard basis. -/
 lemma altRightRightToMatrix_symm_expand_tmul (M : Matrix (Fin 2) (Fin 2) ℂ) :
     altRightRightToMatrix.symm M = ∑ i, ∑ j, M i j • (altRightBasis i ⊗ₜ[ℂ] rightBasis j) := by
-  simp only [Action.instMonoidalCategory_tensorObj_V, altRightRightToMatrix, LinearEquiv.trans_symm,
-    LinearEquiv.trans_apply, Basis.repr_symm_apply]
+  simp only [altRightRightToMatrix, LinearEquiv.trans_symm, LinearEquiv.trans_apply,
+    Basis.repr_symm_apply]
   rw [Finsupp.linearCombination_apply_of_mem_supported ℂ (s := Finset.univ)]
   · rw [Fintype.sum_prod_type]
     refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
@@ -182,8 +181,8 @@ def altLeftAltRightToMatrix : (altLeftHanded ⊗ altRightHanded).V ≃ₗ[ℂ] M
 /-- Expanding `altLeftAltRightToMatrix` in terms of the standard basis. -/
 lemma altLeftAltRightToMatrix_symm_expand_tmul (M : Matrix (Fin 2) (Fin 2) ℂ) :
     altLeftAltRightToMatrix.symm M = ∑ i, ∑ j, M i j • (altLeftBasis i ⊗ₜ[ℂ] altRightBasis j) := by
-  simp only [Action.instMonoidalCategory_tensorObj_V, altLeftAltRightToMatrix,
-    LinearEquiv.trans_symm, LinearEquiv.trans_apply, Basis.repr_symm_apply]
+  simp only [altLeftAltRightToMatrix, LinearEquiv.trans_symm, LinearEquiv.trans_apply,
+    Basis.repr_symm_apply]
   rw [Finsupp.linearCombination_apply_of_mem_supported ℂ (s := Finset.univ)]
   · rw [Fintype.sum_prod_type]
     refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
@@ -200,8 +199,8 @@ def leftRightToMatrix : (leftHanded ⊗ rightHanded).V ≃ₗ[ℂ] Matrix (Fin 2
 /-- Expanding `leftRightToMatrix` in terms of the standard basis. -/
 lemma leftRightToMatrix_symm_expand_tmul (M : Matrix (Fin 2) (Fin 2) ℂ) :
     leftRightToMatrix.symm M = ∑ i, ∑ j, M i j • (leftBasis i ⊗ₜ[ℂ] rightBasis j) := by
-  simp only [Action.instMonoidalCategory_tensorObj_V, leftRightToMatrix, LinearEquiv.trans_symm,
-    LinearEquiv.trans_apply, Basis.repr_symm_apply]
+  simp only [leftRightToMatrix, LinearEquiv.trans_symm, LinearEquiv.trans_apply,
+    Basis.repr_symm_apply]
   rw [Finsupp.linearCombination_apply_of_mem_supported ℂ (s := Finset.univ)]
   · rw [Fintype.sum_prod_type]
     refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
@@ -221,7 +220,7 @@ lemma leftLeftToMatrix_ρ (v : (leftHanded ⊗ leftHanded).V) (M : SL(2,ℂ)) :
     leftLeftToMatrix (TensorProduct.map (leftHanded.ρ M) (leftHanded.ρ M) v) =
     M.1 * leftLeftToMatrix v * (M.1)ᵀ := by
   nth_rewrite 1 [leftLeftToMatrix]
-  simp only [Action.instMonoidalCategory_tensorObj_V, LinearEquiv.trans_apply]
+  simp only [LinearEquiv.trans_apply]
   trans (LinearEquiv.curry ℂ ℂ (Fin 2) (Fin 2)) ((LinearMap.toMatrix
       (leftBasis.tensorProduct leftBasis) (leftBasis.tensorProduct leftBasis)
       (TensorProduct.map (leftHanded.ρ M) (leftHanded.ρ M)))
@@ -251,8 +250,7 @@ lemma leftLeftToMatrix_ρ (v : (leftHanded ⊗ leftHanded).V) (M : SL(2,ℂ)) :
   funext x
   congr
   funext x1
-  simp only [leftBasis_ρ_apply, Finsupp.linearEquivFunOnFinite_apply,
-    Action.instMonoidalCategory_tensorObj_V]
+  simp only [leftBasis_ρ_apply]
   rw [mul_assoc]
   nth_rewrite 2 [mul_comm]
   rw [← mul_assoc]
@@ -263,7 +261,7 @@ lemma altLeftaltLeftToMatrix_ρ (v : (altLeftHanded ⊗ altLeftHanded).V) (M : S
     altLeftaltLeftToMatrix (TensorProduct.map (altLeftHanded.ρ M) (altLeftHanded.ρ M) v) =
     (M.1⁻¹)ᵀ * altLeftaltLeftToMatrix v * (M.1⁻¹) := by
   nth_rewrite 1 [altLeftaltLeftToMatrix]
-  simp only [Action.instMonoidalCategory_tensorObj_V, LinearEquiv.trans_apply]
+  simp only [LinearEquiv.trans_apply]
   trans (LinearEquiv.curry ℂ ℂ (Fin 2) (Fin 2)) ((LinearMap.toMatrix
       (altLeftBasis.tensorProduct altLeftBasis) (altLeftBasis.tensorProduct altLeftBasis)
       (TensorProduct.map (altLeftHanded.ρ M) (altLeftHanded.ρ M)))
@@ -294,7 +292,7 @@ lemma altLeftaltLeftToMatrix_ρ (v : (altLeftHanded ⊗ altLeftHanded).V) (M : S
   funext x
   congr
   funext x1
-  simp only [altLeftBasis_ρ_apply, transpose_apply, Action.instMonoidalCategory_tensorObj_V]
+  simp only [altLeftBasis_ρ_apply, transpose_apply]
   ring
 
 /-- The group action of `SL(2,ℂ)` on `leftHanded ⊗ altLeftHanded` is equivalent to
@@ -303,7 +301,7 @@ lemma leftAltLeftToMatrix_ρ (v : (leftHanded ⊗ altLeftHanded).V) (M : SL(2,�
     leftAltLeftToMatrix (TensorProduct.map (leftHanded.ρ M) (altLeftHanded.ρ M) v) =
     M.1 * leftAltLeftToMatrix v * (M.1⁻¹) := by
   nth_rewrite 1 [leftAltLeftToMatrix]
-  simp only [Action.instMonoidalCategory_tensorObj_V, LinearEquiv.trans_apply]
+  simp only [LinearEquiv.trans_apply]
   trans (LinearEquiv.curry ℂ ℂ (Fin 2) (Fin 2)) ((LinearMap.toMatrix
       (leftBasis.tensorProduct altLeftBasis) (leftBasis.tensorProduct altLeftBasis)
       (TensorProduct.map (leftHanded.ρ M) (altLeftHanded.ρ M)))
@@ -334,8 +332,7 @@ lemma leftAltLeftToMatrix_ρ (v : (leftHanded ⊗ altLeftHanded).V) (M : SL(2,�
   funext x
   congr
   funext x1
-  simp only [leftBasis_ρ_apply, altLeftBasis_ρ_apply, transpose_apply,
-    Action.instMonoidalCategory_tensorObj_V]
+  simp only [leftBasis_ρ_apply, altLeftBasis_ρ_apply, transpose_apply]
   ring
 
 /-- The group action of `SL(2,ℂ)` on `altLeftHanded ⊗ leftHanded` is equivalent to
@@ -344,7 +341,7 @@ lemma altLeftLeftToMatrix_ρ (v : (altLeftHanded ⊗ leftHanded).V) (M : SL(2,�
     altLeftLeftToMatrix (TensorProduct.map (altLeftHanded.ρ M) (leftHanded.ρ M) v) =
     (M.1⁻¹)ᵀ * altLeftLeftToMatrix v * (M.1)ᵀ := by
   nth_rewrite 1 [altLeftLeftToMatrix]
-  simp only [Action.instMonoidalCategory_tensorObj_V, LinearEquiv.trans_apply]
+  simp only [LinearEquiv.trans_apply]
   trans (LinearEquiv.curry ℂ ℂ (Fin 2) (Fin 2)) ((LinearMap.toMatrix
       (altLeftBasis.tensorProduct leftBasis) (altLeftBasis.tensorProduct leftBasis)
       (TensorProduct.map (altLeftHanded.ρ M) (leftHanded.ρ M)))
@@ -375,8 +372,7 @@ lemma altLeftLeftToMatrix_ρ (v : (altLeftHanded ⊗ leftHanded).V) (M : SL(2,�
   funext x
   congr
   funext x1
-  simp only [altLeftBasis_ρ_apply, leftBasis_ρ_apply, transpose_apply,
-    Action.instMonoidalCategory_tensorObj_V]
+  simp only [altLeftBasis_ρ_apply, transpose_apply, leftBasis_ρ_apply]
   ring
 
 /-- The group action of `SL(2,ℂ)` on `rightHanded ⊗ rightHanded` is equivalent to
@@ -385,7 +381,7 @@ lemma rightRightToMatrix_ρ (v : (rightHanded ⊗ rightHanded).V) (M : SL(2,ℂ)
     rightRightToMatrix (TensorProduct.map (rightHanded.ρ M) (rightHanded.ρ M) v) =
     (M.1.map star) * rightRightToMatrix v * ((M.1.map star))ᵀ := by
   nth_rewrite 1 [rightRightToMatrix]
-  simp only [Action.instMonoidalCategory_tensorObj_V, LinearEquiv.trans_apply]
+  simp only [LinearEquiv.trans_apply]
   trans (LinearEquiv.curry ℂ ℂ (Fin 2) (Fin 2)) ((LinearMap.toMatrix
       (rightBasis.tensorProduct rightBasis) (rightBasis.tensorProduct rightBasis)
       (TensorProduct.map (rightHanded.ρ M) (rightHanded.ρ M)))
@@ -417,8 +413,7 @@ lemma rightRightToMatrix_ρ (v : (rightHanded ⊗ rightHanded).V) (M : SL(2,ℂ)
   funext x
   congr
   funext x1
-  simp only [rightBasis_ρ_apply, Finsupp.linearEquivFunOnFinite_apply,
-    Action.instMonoidalCategory_tensorObj_V]
+  simp only [rightBasis_ρ_apply]
   ring
 
 /-- The group action of `SL(2,ℂ)` on `altRightHanded ⊗ altRightHanded` is equivalent to
@@ -427,7 +422,7 @@ lemma altRightAltRightToMatrix_ρ (v : (altRightHanded ⊗ altRightHanded).V) (M
     altRightAltRightToMatrix (TensorProduct.map (altRightHanded.ρ M) (altRightHanded.ρ M) v) =
     ((M.1⁻¹).conjTranspose) * altRightAltRightToMatrix v * (((M.1⁻¹).conjTranspose)ᵀ) := by
   nth_rewrite 1 [altRightAltRightToMatrix]
-  simp only [Action.instMonoidalCategory_tensorObj_V, LinearEquiv.trans_apply]
+  simp only [LinearEquiv.trans_apply]
   trans (LinearEquiv.curry ℂ ℂ (Fin 2) (Fin 2)) ((LinearMap.toMatrix
       (altRightBasis.tensorProduct altRightBasis) (altRightBasis.tensorProduct altRightBasis)
       (TensorProduct.map (altRightHanded.ρ M) (altRightHanded.ρ M)))
@@ -459,7 +454,7 @@ lemma altRightAltRightToMatrix_ρ (v : (altRightHanded ⊗ altRightHanded).V) (M
   funext x
   congr
   funext x1
-  simp only [altRightBasis_ρ_apply, transpose_apply, Action.instMonoidalCategory_tensorObj_V]
+  simp only [altRightBasis_ρ_apply]
   ring
 
 /-- The group action of `SL(2,ℂ)` on `rightHanded ⊗ altRightHanded` is equivalent to
@@ -468,7 +463,7 @@ lemma rightAltRightToMatrix_ρ (v : (rightHanded ⊗ altRightHanded).V) (M : SL(
     rightAltRightToMatrix (TensorProduct.map (rightHanded.ρ M) (altRightHanded.ρ M) v) =
     (M.1.map star) * rightAltRightToMatrix v * (((M.1⁻¹).conjTranspose)ᵀ) := by
   nth_rewrite 1 [rightAltRightToMatrix]
-  simp only [Action.instMonoidalCategory_tensorObj_V, LinearEquiv.trans_apply]
+  simp only [LinearEquiv.trans_apply]
   trans (LinearEquiv.curry ℂ ℂ (Fin 2) (Fin 2)) ((LinearMap.toMatrix
       (rightBasis.tensorProduct altRightBasis) (rightBasis.tensorProduct altRightBasis)
       (TensorProduct.map (rightHanded.ρ M) (altRightHanded.ρ M)))
@@ -500,8 +495,7 @@ lemma rightAltRightToMatrix_ρ (v : (rightHanded ⊗ altRightHanded).V) (M : SL(
   funext x
   congr
   funext x1
-  simp only [rightBasis_ρ_apply, altRightBasis_ρ_apply, transpose_apply,
-    Action.instMonoidalCategory_tensorObj_V]
+  simp only [rightBasis_ρ_apply, altRightBasis_ρ_apply]
   ring
 
 /-- The group action of `SL(2,ℂ)` on `altRightHanded ⊗ rightHanded` is equivalent to
@@ -510,7 +504,7 @@ lemma altRightRightToMatrix_ρ (v : (altRightHanded ⊗ rightHanded).V) (M : SL(
     altRightRightToMatrix (TensorProduct.map (altRightHanded.ρ M) (rightHanded.ρ M) v) =
     ((M.1⁻¹).conjTranspose) * altRightRightToMatrix v * (M.1.map star)ᵀ := by
   nth_rewrite 1 [altRightRightToMatrix]
-  simp only [Action.instMonoidalCategory_tensorObj_V, LinearEquiv.trans_apply]
+  simp only [LinearEquiv.trans_apply]
   trans (LinearEquiv.curry ℂ ℂ (Fin 2) (Fin 2)) ((LinearMap.toMatrix
       (altRightBasis.tensorProduct rightBasis) (altRightBasis.tensorProduct rightBasis)
       (TensorProduct.map (altRightHanded.ρ M) (rightHanded.ρ M)))
@@ -543,15 +537,14 @@ lemma altRightRightToMatrix_ρ (v : (altRightHanded ⊗ rightHanded).V) (M : SL(
   funext x
   congr
   funext x1
-  simp only [altRightBasis_ρ_apply, rightBasis_ρ_apply, transpose_apply,
-    Action.instMonoidalCategory_tensorObj_V]
+  simp only [altRightBasis_ρ_apply, rightBasis_ρ_apply]
   ring
 
 lemma altLeftAltRightToMatrix_ρ (v : (altLeftHanded ⊗ altRightHanded).V) (M : SL(2,ℂ)) :
     altLeftAltRightToMatrix (TensorProduct.map (altLeftHanded.ρ M) (altRightHanded.ρ M) v) =
     (M.1⁻¹)ᵀ * altLeftAltRightToMatrix v * ((M.1⁻¹).conjTranspose)ᵀ := by
   nth_rewrite 1 [altLeftAltRightToMatrix]
-  simp only [Action.instMonoidalCategory_tensorObj_V, LinearEquiv.trans_apply]
+  simp only [LinearEquiv.trans_apply]
   trans (LinearEquiv.curry ℂ ℂ (Fin 2) (Fin 2)) ((LinearMap.toMatrix
       (altLeftBasis.tensorProduct altRightBasis) (altLeftBasis.tensorProduct altRightBasis)
       (TensorProduct.map (altLeftHanded.ρ M) (altRightHanded.ρ M)))
@@ -583,15 +576,14 @@ lemma altLeftAltRightToMatrix_ρ (v : (altLeftHanded ⊗ altRightHanded).V) (M :
   funext x
   congr
   funext x1
-  simp only [altLeftBasis_ρ_apply, altRightBasis_ρ_apply, transpose_apply,
-    Action.instMonoidalCategory_tensorObj_V]
+  simp only [altLeftBasis_ρ_apply, transpose_apply, altRightBasis_ρ_apply]
   ring
 
 lemma leftRightToMatrix_ρ (v : (leftHanded ⊗ rightHanded).V) (M : SL(2,ℂ)) :
     leftRightToMatrix (TensorProduct.map (leftHanded.ρ M) (rightHanded.ρ M) v) =
     M.1 * leftRightToMatrix v * (M.1)ᴴ := by
   nth_rewrite 1 [leftRightToMatrix]
-  simp only [Action.instMonoidalCategory_tensorObj_V, LinearEquiv.trans_apply]
+  simp only [LinearEquiv.trans_apply]
   trans (LinearEquiv.curry ℂ ℂ (Fin 2) (Fin 2)) ((LinearMap.toMatrix
       (leftBasis.tensorProduct rightBasis) (leftBasis.tensorProduct rightBasis)
       (TensorProduct.map (leftHanded.ρ M) (rightHanded.ρ M)))
@@ -622,8 +614,7 @@ lemma leftRightToMatrix_ρ (v : (leftHanded ⊗ rightHanded).V) (M : SL(2,ℂ)) 
   funext x
   congr
   funext x1
-  simp only [leftBasis_ρ_apply, rightBasis_ρ_apply, transpose_apply,
-    Action.instMonoidalCategory_tensorObj_V]
+  simp only [leftBasis_ρ_apply, rightBasis_ρ_apply]
   rw [Matrix.conjTranspose]
   simp only [RCLike.star_def, map_apply, transpose_apply]
   ring
@@ -638,7 +629,7 @@ lemma leftLeftToMatrix_ρ_symm (v : Matrix (Fin 2) (Fin 2) ℂ) (M : SL(2,ℂ)) 
     TensorProduct.map (leftHanded.ρ M) (leftHanded.ρ M) (leftLeftToMatrix.symm v) =
     leftLeftToMatrix.symm (M.1 * v * (M.1)ᵀ) := by
   have h1 := leftLeftToMatrix_ρ (leftLeftToMatrix.symm v) M
-  simp only [Action.instMonoidalCategory_tensorObj_V, LinearEquiv.apply_symm_apply] at h1
+  simp only [LinearEquiv.apply_symm_apply] at h1
   rw [← h1]
   simp
 
@@ -646,7 +637,7 @@ lemma altLeftaltLeftToMatrix_ρ_symm (v : Matrix (Fin 2) (Fin 2) ℂ) (M : SL(2,
     TensorProduct.map (altLeftHanded.ρ M) (altLeftHanded.ρ M) (altLeftaltLeftToMatrix.symm v) =
     altLeftaltLeftToMatrix.symm ((M.1⁻¹)ᵀ * v * (M.1⁻¹)) := by
   have h1 := altLeftaltLeftToMatrix_ρ (altLeftaltLeftToMatrix.symm v) M
-  simp only [Action.instMonoidalCategory_tensorObj_V, LinearEquiv.apply_symm_apply] at h1
+  simp only [LinearEquiv.apply_symm_apply] at h1
   rw [← h1]
   simp
 
@@ -654,7 +645,7 @@ lemma leftAltLeftToMatrix_ρ_symm (v : Matrix (Fin 2) (Fin 2) ℂ) (M : SL(2,ℂ
     TensorProduct.map (leftHanded.ρ M) (altLeftHanded.ρ M) (leftAltLeftToMatrix.symm v) =
     leftAltLeftToMatrix.symm (M.1 * v * (M.1⁻¹)) := by
   have h1 := leftAltLeftToMatrix_ρ (leftAltLeftToMatrix.symm v) M
-  simp only [Action.instMonoidalCategory_tensorObj_V, LinearEquiv.apply_symm_apply] at h1
+  simp only [LinearEquiv.apply_symm_apply] at h1
   rw [← h1]
   simp
 
@@ -662,7 +653,7 @@ lemma altLeftLeftToMatrix_ρ_symm (v : Matrix (Fin 2) (Fin 2) ℂ) (M : SL(2,ℂ
     TensorProduct.map (altLeftHanded.ρ M) (leftHanded.ρ M) (altLeftLeftToMatrix.symm v) =
     altLeftLeftToMatrix.symm ((M.1⁻¹)ᵀ * v * (M.1)ᵀ) := by
   have h1 := altLeftLeftToMatrix_ρ (altLeftLeftToMatrix.symm v) M
-  simp only [Action.instMonoidalCategory_tensorObj_V, LinearEquiv.apply_symm_apply] at h1
+  simp only [LinearEquiv.apply_symm_apply] at h1
   rw [← h1]
   simp
 
@@ -670,7 +661,7 @@ lemma rightRightToMatrix_ρ_symm (v : Matrix (Fin 2) (Fin 2) ℂ) (M : SL(2,ℂ)
     TensorProduct.map (rightHanded.ρ M) (rightHanded.ρ M) (rightRightToMatrix.symm v) =
     rightRightToMatrix.symm ((M.1.map star) * v * ((M.1.map star))ᵀ) := by
   have h1 := rightRightToMatrix_ρ (rightRightToMatrix.symm v) M
-  simp only [Action.instMonoidalCategory_tensorObj_V, LinearEquiv.apply_symm_apply] at h1
+  simp only [LinearEquiv.apply_symm_apply] at h1
   rw [← h1]
   simp
 
@@ -678,7 +669,7 @@ lemma altRightAltRightToMatrix_ρ_symm (v : Matrix (Fin 2) (Fin 2) ℂ) (M : SL(
     TensorProduct.map (altRightHanded.ρ M) (altRightHanded.ρ M) (altRightAltRightToMatrix.symm v) =
     altRightAltRightToMatrix.symm (((M.1⁻¹).conjTranspose) * v * ((M.1⁻¹).conjTranspose)ᵀ) := by
   have h1 := altRightAltRightToMatrix_ρ (altRightAltRightToMatrix.symm v) M
-  simp only [Action.instMonoidalCategory_tensorObj_V, LinearEquiv.apply_symm_apply] at h1
+  simp only [LinearEquiv.apply_symm_apply] at h1
   rw [← h1]
   simp
 
@@ -686,7 +677,7 @@ lemma rightAltRightToMatrix_ρ_symm (v : Matrix (Fin 2) (Fin 2) ℂ) (M : SL(2,�
     TensorProduct.map (rightHanded.ρ M) (altRightHanded.ρ M) (rightAltRightToMatrix.symm v) =
     rightAltRightToMatrix.symm ((M.1.map star) * v * (((M.1⁻¹).conjTranspose)ᵀ)) := by
   have h1 := rightAltRightToMatrix_ρ (rightAltRightToMatrix.symm v) M
-  simp only [Action.instMonoidalCategory_tensorObj_V, LinearEquiv.apply_symm_apply] at h1
+  simp only [LinearEquiv.apply_symm_apply] at h1
   rw [← h1]
   simp
 
@@ -694,7 +685,7 @@ lemma altRightRightToMatrix_ρ_symm (v : Matrix (Fin 2) (Fin 2) ℂ) (M : SL(2,�
     TensorProduct.map (altRightHanded.ρ M) (rightHanded.ρ M) (altRightRightToMatrix.symm v) =
     altRightRightToMatrix.symm (((M.1⁻¹).conjTranspose) * v * (M.1.map star)ᵀ) := by
   have h1 := altRightRightToMatrix_ρ (altRightRightToMatrix.symm v) M
-  simp only [Action.instMonoidalCategory_tensorObj_V, LinearEquiv.apply_symm_apply] at h1
+  simp only [LinearEquiv.apply_symm_apply] at h1
   rw [← h1]
   simp
 
@@ -702,7 +693,7 @@ lemma altLeftAltRightToMatrix_ρ_symm (v : Matrix (Fin 2) (Fin 2) ℂ) (M : SL(2
     TensorProduct.map (altLeftHanded.ρ M) (altRightHanded.ρ M) (altLeftAltRightToMatrix.symm v) =
     altLeftAltRightToMatrix.symm ((M.1⁻¹)ᵀ * v * ((M.1⁻¹).conjTranspose)ᵀ) := by
   have h1 := altLeftAltRightToMatrix_ρ (altLeftAltRightToMatrix.symm v) M
-  simp only [Action.instMonoidalCategory_tensorObj_V, LinearEquiv.apply_symm_apply] at h1
+  simp only [LinearEquiv.apply_symm_apply] at h1
   rw [← h1]
   simp
 
@@ -710,7 +701,7 @@ lemma leftRightToMatrix_ρ_symm (v : Matrix (Fin 2) (Fin 2) ℂ) (M : SL(2,ℂ))
     TensorProduct.map (leftHanded.ρ M) (rightHanded.ρ M) (leftRightToMatrix.symm v) =
     leftRightToMatrix.symm (M.1 * v * (M.1)ᴴ) := by
   have h1 := leftRightToMatrix_ρ (leftRightToMatrix.symm v) M
-  simp only [Action.instMonoidalCategory_tensorObj_V, LinearEquiv.apply_symm_apply] at h1
+  simp only [LinearEquiv.apply_symm_apply] at h1
   rw [← h1]
   simp
 

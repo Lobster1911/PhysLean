@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Joseph Tooby-Smith
 -/
 import PhysLean.QuantumMechanics.OneDimension.HarmonicOscillator.Basic
-import Mathlib.Topology.Algebra.Polynomial
+import PhysLean.Mathematics.SpecialFunctions.PhysHermite
 /-!
 
 # Eigenfunction of the Harmonic Oscillator
@@ -18,10 +18,7 @@ namespace HarmonicOscillator
 
 variable (Q : HarmonicOscillator)
 
-open Nat
-open PhysLean
-open HilbertSpace
-open MeasureTheory
+open Nat PhysLean HilbertSpace MeasureTheory Constants
 
 /-- The `n`th eigenfunction of the Harmonic oscillator is defined as the function `ℝ → ℂ`
   taking `x : ℝ` to
@@ -161,10 +158,10 @@ lemma eigenfunction_continuous (n : ℕ) : Continuous (Q.eigenfunction n) := by
 /-- The `n`th eigenfunction is an eigenfunction of the parity operator with
   the eigenvalue `(-1) ^ n`. -/
 lemma eigenfunction_parity (n : ℕ) :
-    parity (Q.eigenfunction n) = (-1) ^ n * Q.eigenfunction n := by
+    parityOperator (Q.eigenfunction n) = (-1) ^ n * Q.eigenfunction n := by
   funext x
   rw [eigenfunction_eq]
-  simp only [parity, LinearMap.coe_mk, AddHom.coe_mk, mul_neg, Pi.mul_apply, Pi.pow_apply,
+  simp only [parityOperator, LinearMap.coe_mk, AddHom.coe_mk, mul_neg, Pi.mul_apply, Pi.pow_apply,
     Pi.neg_apply, Pi.one_apply]
   rw [show -x / Q.ξ = - (x / Q.ξ) by ring]
   rw [← physHermite_eq_aeval, physHermite_parity]
@@ -237,7 +234,7 @@ lemma eigenfunction_normalized (n : ℕ) : ⟪HilbertSpace.mk (Q.eigenfunction_m
   conv_lhs =>
     enter [2, x]
     rw [eigenfunction_conj, Q.eigenfunction_mul_self]
-  rw [MeasureTheory.integral_mul_left, integral_complex_ofReal]
+  rw [MeasureTheory.integral_const_mul, integral_complex_ofReal]
   have hc : (∫ (x : ℝ), physHermite n (x /Q.ξ) ^ 2 * Real.exp (- x ^ 2 / Q.ξ^2))
       = ∫ (x : ℝ), (physHermite n (1/Q.ξ * x) *
       physHermite n (1/Q.ξ * x)) * Real.exp (- (1/Q.ξ)^2 * x ^ 2) := by
@@ -260,7 +257,7 @@ lemma eigenfunction_orthogonal {n p : ℕ} (hnp : n ≠ p) :
   conv_lhs =>
     enter [2, x]
     rw [eigenfunction_conj, Q.eigenfunction_mul n p]
-  rw [MeasureTheory.integral_mul_left, integral_complex_ofReal]
+  rw [MeasureTheory.integral_const_mul, integral_complex_ofReal]
   have hc : (∫ (x : ℝ), (physHermite n (x/Q.ξ) * physHermite p (x/Q.ξ)) * Real.exp (-x ^ 2 / Q.ξ^2))
       = ∫ (x : ℝ), (physHermite n (1/Q.ξ * x) * physHermite p (1/Q.ξ * x)) *
       Real.exp (- (1/Q.ξ)^2 * x ^ 2) := by

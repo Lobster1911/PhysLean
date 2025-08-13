@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Joseph Tooby-Smith
 -/
 import PhysLean.QFT.PerturbationTheory.FieldSpecification.CrAnFieldOp
+import PhysLean.Mathematics.List
 /-!
 
 # Creation and annihilation sections
@@ -321,8 +322,8 @@ lemma drop_left {φs φs' : List 𝓕.FieldOp} (ψs : CrAnSection φs)
   and `drop` and their interrelationship. -/
 def appendEquiv {φs φs' : List 𝓕.FieldOp} : CrAnSection (φs ++ φs') ≃
     CrAnSection φs × CrAnSection φs' where
-  toFun ψs := (congr (List.take_left φs φs') (take φs.length ψs),
-    congr (List.drop_left φs φs') (drop φs.length ψs))
+  toFun ψs := (congr (List.take_left (l₁ := φs) (l₂ := φs')) (take φs.length ψs),
+    congr (List.drop_left (l₁ := φs) (l₂ := φs')) (drop φs.length ψs))
   invFun ψsψs' := append ψsψs'.1 ψsψs'.2
   left_inv ψs := by
     apply Subtype.ext

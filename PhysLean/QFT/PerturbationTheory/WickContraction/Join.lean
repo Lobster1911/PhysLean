@@ -3,12 +3,7 @@ Copyright (c) 2025 Joseph Tooby-Smith. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Joseph Tooby-Smith
 -/
-import PhysLean.QFT.PerturbationTheory.WickContraction.TimeContract
-import PhysLean.QFT.PerturbationTheory.WickContraction.StaticContract
-import PhysLean.QFT.PerturbationTheory.FieldOpAlgebra.TimeContraction
-import PhysLean.QFT.PerturbationTheory.WickContraction.SubContraction
 import PhysLean.QFT.PerturbationTheory.WickContraction.Singleton
-
 /-!
 
 # Join of contractions
@@ -21,7 +16,7 @@ variable {𝓕 : FieldSpecification}
 namespace WickContraction
 variable {n : ℕ} (c : WickContraction n)
 open PhysLean.List
-open FieldOpAlgebra
+open WickAlgebra
 
 /-- Given a list `φs` of `𝓕.FieldOp`, a Wick contraction `φsΛ` of `φs` and a Wick contraction
   `φsucΛ` of `[φsΛ]ᵘᶜ`, `join φsΛ φsucΛ` is defined as the Wick contraction of `φs` consisting of
@@ -547,11 +542,11 @@ lemma join_getDual?_apply_uncontractedListEmb {φs : List 𝓕.FieldOp}
     have h1 : (φsucΛ.getDual? i) = (φsucΛ.getDual? i).get (by simpa using h) :=
       Eq.symm (Option.some_get h)
     conv_rhs => rw [h1]
-    simp only [Option.map_some']
+    simp only [Option.map_some]
     exact (join_getDual?_apply_uncontractedListEmb_isSome_iff φsΛ φsucΛ i).mpr h
-  · simp only [Bool.not_eq_true, Option.not_isSome, Option.isNone_iff_eq_none] at h
+  · simp only [Bool.not_eq_true, Option.isSome_eq_false_iff, Option.isNone_iff_eq_none] at h
     rw [h]
-    simp only [Option.map_none', join_getDual?_apply_uncontractedListEmb_eq_none_iff]
+    simp only [Option.map_none, join_getDual?_apply_uncontractedListEmb_eq_none_iff]
     exact h
 
 /-!

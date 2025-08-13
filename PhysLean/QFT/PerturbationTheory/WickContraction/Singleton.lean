@@ -4,6 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Joseph Tooby-Smith
 -/
 import PhysLean.QFT.PerturbationTheory.WickContraction.SubContraction
+import PhysLean.QFT.PerturbationTheory.WickContraction.StaticContract
+import PhysLean.QFT.PerturbationTheory.WickContraction.TimeContract
+import PhysLean.QFT.PerturbationTheory.WickContraction.Sign.Basic
 /-!
 
 # Singleton of contractions
@@ -16,7 +19,7 @@ variable {𝓕 : FieldSpecification}
 namespace WickContraction
 variable {n : ℕ} (c : WickContraction n)
 open PhysLean.List
-open FieldOpAlgebra
+open WickAlgebra
 open FieldStatistic
 
 /-- The Wick contraction formed from a single ordered pair. -/
@@ -121,7 +124,7 @@ lemma subContraction_singleton_eq_singleton {φs : List 𝓕.FieldOp}
 
 lemma singleton_timeContract {φs : List 𝓕.FieldOp} {i j : Fin φs.length} (hij : i < j) :
     (singleton hij).timeContract =
-    ⟨FieldOpAlgebra.timeContract φs[i] φs[j], timeContract_mem_center _ _⟩ := by
+    ⟨WickAlgebra.timeContract φs[i] φs[j], timeContract_mem_center _ _⟩ := by
   rw [timeContract, singleton_prod]
   simp
 

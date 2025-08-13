@@ -18,7 +18,7 @@ open MonoidalCategory
 namespace TensorSpecies
 open OverColor
 
-variable {k : Type} [CommRing k] {G : Type} [Group G] {S : TensorSpecies k G}
+variable {k : Type} [CommRing k] {C G : Type} [Group G] {S : TensorSpecies k C G}
 
 namespace Tensor
 
@@ -151,8 +151,8 @@ lemma Pure.dropPairEmb_comm_natAdd {n n1 : ℕ}
     · simp_all [Fin.ext_iff]
   simpa using congrFun (congrArg (fun x => x.toFun) hfg) m
 
-lemma Pure.dropPairEmb_permCond_prod {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
-    {c1 : Fin n1 → S.C}
+lemma Pure.dropPairEmb_permCond_prod {n n1 : ℕ} {c : Fin (n + 1 + 1) → C}
+    {c1 : Fin n1 → C}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ S.τ (c i) = c j) :
     PermCond
       ((Sum.elim c1 c ∘ finSumFinEquiv.symm) ∘
@@ -175,15 +175,14 @@ lemma Pure.dropPairEmb_permCond_prod {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
     rw [dropPairEmb_comm_natAdd i j hij.1]
     simp
 
-lemma Pure.contrPCoeff_natAdd {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
-    {c1 : Fin n1 → S.C}
+lemma Pure.contrPCoeff_natAdd {n n1 : ℕ} {c : Fin (n + 1 + 1) → C}
+    {c1 : Fin n1 → C}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ S.τ (c i) = c j)
     (p : Pure S c) (p1 : Pure S c1) :
     contrPCoeff (Fin.natAdd n1 i) (Fin.natAdd n1 j)
     (by simp_all [Fin.ext_iff]) (p1.prodP p)
     = contrPCoeff i j hij p := by
-  simp only [contrPCoeff, Function.comp_apply, Monoidal.tensorUnit_obj,
-    Action.instMonoidalCategory_tensorUnit_V, Equivalence.symm_inverse,
+  simp only [contrPCoeff, Function.comp_apply, Monoidal.tensorUnit_obj, Equivalence.symm_inverse,
     Action.functorCategoryEquivalence_functor, Action.FunctorCategoryEquivalence.functor_obj_obj,
     Functor.comp_obj, Discrete.functor_obj_eq_as, prodP_apply_natAdd]
   conv_lhs => erw [S.contr_congr
@@ -197,15 +196,14 @@ lemma Pure.contrPCoeff_natAdd {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
       ((ConcreteCategory.hom (S.FD.map (eqToHom _))) _) = _
     simp [map_map_apply]
 
-lemma Pure.contrPCoeff_castAdd {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
-    {c1 : Fin n1 → S.C}
+lemma Pure.contrPCoeff_castAdd {n n1 : ℕ} {c : Fin (n + 1 + 1) → C}
+    {c1 : Fin n1 → C}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ S.τ (c i) = c j)
     (p : Pure S c) (p1 : Pure S c1) :
     contrPCoeff (Fin.castAdd n1 i) (Fin.castAdd n1 j)
     (by simp_all [Fin.ext_iff]) (p.prodP p1)
     = contrPCoeff i j hij p := by
-  simp only [contrPCoeff, Function.comp_apply, Monoidal.tensorUnit_obj,
-    Action.instMonoidalCategory_tensorUnit_V, Equivalence.symm_inverse,
+  simp only [contrPCoeff, Function.comp_apply, Monoidal.tensorUnit_obj, Equivalence.symm_inverse,
     Action.functorCategoryEquivalence_functor, Action.FunctorCategoryEquivalence.functor_obj_obj,
     Functor.comp_obj, Discrete.functor_obj_eq_as, prodP_apply_castAdd]
   conv_lhs => erw [S.contr_congr _ ((c i)) (by simp)]
@@ -218,8 +216,8 @@ lemma Pure.contrPCoeff_castAdd {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
       ((ConcreteCategory.hom (S.FD.map (eqToHom _))) _) = _
     simp [map_map_apply]
 
-lemma Pure.prodP_dropPair {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
-    {c1 : Fin n1 → S.C}
+lemma Pure.prodP_dropPair {n n1 : ℕ} {c : Fin (n + 1 + 1) → C}
+    {c1 : Fin n1 → C}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ S.τ (c i) = c j)
     (p : Pure S c) (p1 : Pure S c1) :
     p1.prodP (dropPair i j hij.1 p) = permP id (Pure.dropPairEmb_permCond_prod i j hij)
@@ -238,12 +236,12 @@ lemma Pure.prodP_dropPair {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
     simp [map_map_apply]
   | Sum.inr m =>
     simp only [finSumFinEquiv_apply_right]
-    rw [← congr_right (p1.prodP p) _ (Fin.natAdd (n1) (dropPairEmb i j m))
+    rw [← congr_right (p1.prodP p) _ (Fin.natAdd n1 (dropPairEmb i j m))
       (by rw [dropPairEmb_comm_natAdd i j hij.1])]
     simp [map_map_apply]
 
-lemma Pure.prodP_contrP_snd {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
-    {c1 : Fin n1 → S.C}
+lemma Pure.prodP_contrP_snd {n n1 : ℕ} {c : Fin (n + 1 + 1) → C}
+    {c1 : Fin n1 → C}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ S.τ (c i) = c j)
     (p : Pure S c) (p1 : Pure S c1) :
     prodT p1.toTensor (contrP i j hij p) =
@@ -260,8 +258,8 @@ lemma Pure.prodP_contrP_snd {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
   congr
   rw [prodP_dropPair _ _ hij]
 
-lemma prodT_contrT_snd {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
-    {c1 : Fin n1 → S.C}
+lemma prodT_contrT_snd {n n1 : ℕ} {c : Fin (n + 1 + 1) → C}
+    {c1 : Fin n1 → C}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ S.τ (c i) = c j)
     (t : Tensor S c) (t1 : Tensor S c1) :
     prodT t1 (contrT n i j hij t) =
@@ -304,8 +302,8 @@ lemma prodT_contrT_snd {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
   rw [Pure.prodP_contrP_snd, prodT_pure, contrT_pure]
   rfl
 
-lemma contrT_prodT_snd {n n1 : ℕ} {c : Fin (n + 1 + 1) → S.C}
-    {c1 : Fin n1 → S.C}
+lemma contrT_prodT_snd {n n1 : ℕ} {c : Fin (n + 1 + 1) → C}
+    {c1 : Fin n1 → C}
     (i j : Fin (n + 1 + 1)) (hij : i ≠ j ∧ S.τ (c i) = c j)
     (t : Tensor S c) (t1 : Tensor S c1) :
     (contrT _

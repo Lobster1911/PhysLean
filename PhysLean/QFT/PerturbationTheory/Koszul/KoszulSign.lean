@@ -85,10 +85,10 @@ lemma koszulSign_erase_boson {𝓕 : Type} (q : 𝓕 → FieldStatistic) (le : �
 
 lemma koszulSign_insertIdx [IsTotal 𝓕 le] [IsTrans 𝓕 le] (φ : 𝓕) :
     (φs : List 𝓕) → (n : ℕ) → (hn : n ≤ φs.length) →
-    koszulSign q le (List.insertIdx n φ φs) = 𝓢(q φ, ofList q (φs.take n)) * koszulSign q le φs *
-      𝓢(q φ, ofList q ((List.insertionSort le (List.insertIdx n φ φs)).take
-      (insertionSortEquiv le (List.insertIdx n φ φs) ⟨n, by
-        rw [List.length_insertIdx _ _]
+    koszulSign q le (List.insertIdx φs n φ) = 𝓢(q φ, ofList q (φs.take n)) * koszulSign q le φs *
+      𝓢(q φ, ofList q ((List.insertionSort le (List.insertIdx φs n φ)).take
+      (insertionSortEquiv le (List.insertIdx φs n φ) ⟨n, by
+        rw [List.length_insertIdx]
         simp only [hn, ↓reduceIte]
         omega⟩)))
   | [], 0, h => by
@@ -111,7 +111,7 @@ lemma koszulSign_insertIdx [IsTotal 𝓕 le] [IsTrans 𝓕 le] (φ : 𝓕) :
       rw [orderedInsert_eq_insertIdx_orderedInsertPos]
     conv_rhs =>
       rhs
-      rw [← ofList_take_insert]
+      erw [← ofList_take_insert]
       change 𝓢(q φ, ofList q ((List.insertionSort le (φ1 :: φs)).take
         (↑(orderedInsertPos le ((List.insertionSort le (φ1 :: φs))) φ))))
       rw [← koszulSignInsert_eq_exchangeSign_take q le]
@@ -142,13 +142,13 @@ lemma koszulSign_insertIdx [IsTotal 𝓕 le] [IsTrans 𝓕 le] (φ : 𝓕) :
     conv_rhs =>
       rw [mul_assoc, mul_assoc]
     congr 1
-    let rs := (List.insertionSort le (List.insertIdx n φ φs))
-    have hnsL : n < (List.insertIdx n φ φs).length := by
-      rw [List.length_insertIdx _ _]
+    let rs := (List.insertionSort le (List.insertIdx φs n φ))
+    have hnsL : n < (List.insertIdx φs n φ).length := by
+      rw [List.length_insertIdx]
       simp only [List.length_cons, add_le_add_iff_right] at h
       simp only [h, ↓reduceIte]
       omega
-    let ni : Fin rs.length := (insertionSortEquiv le (List.insertIdx n φ φs))
+    let ni : Fin rs.length := (insertionSortEquiv le (List.insertIdx φs n φ))
       ⟨n, hnsL⟩
     let nro : Fin (rs.length + 1) :=
       ⟨↑(orderedInsertPos le rs φ1), orderedInsertPos_lt_length le rs φ1⟩
@@ -158,7 +158,7 @@ lemma koszulSign_insertIdx [IsTotal 𝓕 le] [IsTrans 𝓕 le] (φ : 𝓕) :
     · simp only [rs, ni]
       ring
     trans koszulSignInsert q le φ1 φs * (𝓢(q φ, q φ1) *
-          𝓢(q φ, ofList q ((List.insertIdx nro φ1 rs).take (nro.succAbove ni))))
+          𝓢(q φ, ofList q ((List.insertIdx rs nro φ1).take (nro.succAbove ni))))
     swap
     · simp only [rs, nro, ni]
       ring
@@ -175,7 +175,7 @@ lemma koszulSign_insertIdx [IsTotal 𝓕 le] [IsTrans 𝓕 le] (φ : 𝓕) :
     have hc2 (hninro : ¬ ni.castSucc < nro) : le φ1 φ := by
       rw [← hns]
       refine gt_orderedInsertPos_rel le φ1 rs ?_ ni hninro
-      exact List.sorted_insertionSort le (List.insertIdx n φ φs)
+      exact List.sorted_insertionSort le (List.insertIdx φs n φ)
     by_cases hn : ni.castSucc < nro
     · simp only [hn, ↓reduceIte, Fin.coe_castSucc]
       rw [ofList_take_insertIdx_gt]
@@ -194,7 +194,7 @@ lemma koszulSign_insertIdx [IsTotal 𝓕 le] [IsTrans 𝓕 le] (φ : 𝓕) :
       · exact Nat.le_of_lt_succ (orderedInsertPos_lt_length le rs φ1)
 
 lemma insertIdx_eraseIdx {I : Type} : (n : ℕ) → (r : List I) → (hn : n < r.length) →
-    List.insertIdx n (r.get ⟨n, hn⟩) (r.eraseIdx n) = r
+    List.insertIdx (r.eraseIdx n) n (r.get ⟨n, hn⟩) = r
   | n, [], hn => by
     simp at hn
   | 0, r0 :: r, hn => by
@@ -209,7 +209,7 @@ lemma koszulSign_eraseIdx [IsTotal 𝓕 le] [IsTrans 𝓕 le] (φs : List 𝓕) 
     𝓢(q (φs.get n), ofList q (List.take (↑(insertionSortEquiv le φs n))
     (List.insertionSort le φs))) := by
   let φs' := φs.eraseIdx ↑n
-  have hφs : List.insertIdx n (φs.get n) φs' = φs := by
+  have hφs : List.insertIdx φs' n (φs.get n) = φs := by
     exact insertIdx_eraseIdx n.1 φs n.prop
   conv_rhs =>
     lhs
@@ -334,10 +334,10 @@ lemma koszulSign_of_append_eq_insertionSort_left [IsTotal 𝓕 le] [IsTrans 𝓕
   | φs, [] => by
     simp
   | φs, φ :: φs' => by
-    have h1 : (φs ++ φ :: φs') = List.insertIdx φs.length φ (φs ++ φs') := by
+    have h1 : (φs ++ φ :: φs') = List.insertIdx (φs ++ φs') φs.length φ := by
       rw [insertIdx_length_fst_append]
     have h2 : (List.insertionSort le φs ++ φ :: φs') =
-        List.insertIdx (List.insertionSort le φs).length φ (List.insertionSort le φs ++ φs') := by
+        List.insertIdx (List.insertionSort le φs ++ φs') (List.insertionSort le φs).length φ := by
       rw [insertIdx_length_fst_append]
     rw [h1, h2]
     rw [koszulSign_insertIdx _ _ _ _ _ (by simp)]
@@ -353,7 +353,7 @@ lemma koszulSign_of_append_eq_insertionSort_left [IsTotal 𝓕 le] [IsTrans 𝓕
     left
     congr 3
     · have h2 : (List.insertionSort le φs ++ φ :: φs') =
-          List.insertIdx φs.length φ (List.insertionSort le φs ++ φs') := by
+          List.insertIdx (List.insertionSort le φs ++ φs') φs.length φ := by
         rw [← insertIdx_length_fst_append]
         simp
       rw [insertionSortEquiv_congr _ _ h2.symm]

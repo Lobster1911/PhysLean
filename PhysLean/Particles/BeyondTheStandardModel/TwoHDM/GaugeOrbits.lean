@@ -3,9 +3,10 @@ Copyright (c) 2024 Joseph Tooby-Smith. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Joseph Tooby-Smith
 -/
-import PhysLean.Particles.BeyondTheStandardModel.TwoHDM.Basic
+import Mathlib.Analysis.Matrix
+import PhysLean.Particles.StandardModel.HiggsBoson.PointwiseInnerProd
+import Mathlib.LinearAlgebra.Matrix.PosDef
 import PhysLean.Particles.StandardModel.HiggsBoson.GaugeAction
-import Mathlib.Analysis.CStarAlgebra.Matrix
 /-!
 
 # Gauge orbits for the 2HDM
@@ -63,7 +64,7 @@ local instance : NormedSpace ℝ (Matrix (Fin 2) (Fin 2) ℂ) := Matrix.normedSp
 /-- The matrix `prodMatrix` is positive semi-definite. -/
 lemma prodMatrix_posSemiDef (Φ1 Φ2 : HiggsField) (x : SpaceTime) :
     (prodMatrix Φ1 Φ2 x).PosSemidef := by
-  rw [Matrix.posSemidef_iff_eq_transpose_mul_self]
+  rw [Matrix.posSemidef_iff_eq_conjTranspose_mul_self]
   use (fieldCompMatrix Φ1 Φ2 x).conjTranspose
   simpa using prodMatrix_eq_fieldCompMatrix_sq Φ1 Φ2 x
 

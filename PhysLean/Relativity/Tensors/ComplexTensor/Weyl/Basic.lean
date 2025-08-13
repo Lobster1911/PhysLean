@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Joseph Tooby-Smith
 -/
 import PhysLean.Relativity.Tensors.ComplexTensor.Weyl.Modules
+import PhysLean.Relativity.SL2C.Basic
 /-!
 
 # Weyl fermions
@@ -39,7 +40,7 @@ def leftHanded : Rep ℂ SL(2,ℂ) := Rep.of {
   map_mul' := fun M N => by
     simp only [SpecialLinearGroup.coe_mul]
     ext1 x
-    simp only [LinearMap.coe_mk, AddHom.coe_mk, LinearMap.mul_apply, LinearEquiv.apply_symm_apply,
+    simp only [LinearMap.coe_mk, AddHom.coe_mk, Module.End.mul_apply, LinearEquiv.apply_symm_apply,
       mulVec_mulVec]}
 
 /-- The standard basis on left-handed Weyl fermions. -/
@@ -52,7 +53,7 @@ lemma leftBasis_ρ_apply (M : SL(2,ℂ)) (i j : Fin 2) :
   rw [LinearMap.toMatrix_apply]
   simp only [leftBasis, Basis.coe_ofEquivFun, Basis.ofEquivFun_repr_apply]
   change (M.1 *ᵥ (Pi.single j 1)) i = _
-  simp only [mulVec_single, MulOpposite.op_one, Pi.smul_apply, transpose_apply, one_smul]
+  simp
 
 @[simp]
 lemma leftBasis_toFin2ℂ (i : Fin 2) : (leftBasis i).toFin2ℂ = Pi.single i 1 := by
@@ -76,7 +77,7 @@ def altLeftHanded : Rep ℂ SL(2,ℂ) := Rep.of {
     simp
   map_mul' := fun M N => by
     ext1 x
-    simp only [SpecialLinearGroup.coe_mul, LinearMap.coe_mk, AddHom.coe_mk, LinearMap.mul_apply,
+    simp only [SpecialLinearGroup.coe_mul, LinearMap.coe_mk, AddHom.coe_mk, Module.End.mul_apply,
       LinearEquiv.apply_symm_apply, mulVec_mulVec, EmbeddingLike.apply_eq_iff_eq]
     refine (congrFun (congrArg _ ?_) _)
     rw [Matrix.mul_inv_rev]
@@ -97,7 +98,7 @@ lemma altLeftBasis_ρ_apply (M : SL(2,ℂ)) (i j : Fin 2) :
   rw [LinearMap.toMatrix_apply]
   simp only [altLeftBasis, Basis.coe_ofEquivFun, Basis.ofEquivFun_repr_apply, transpose_apply]
   change ((M.1⁻¹)ᵀ *ᵥ (Pi.single j 1)) i = _
-  simp only [mulVec_single, MulOpposite.op_one, transpose_transpose, Pi.smul_apply, one_smul]
+  simp
 
 /-- The vector space ℂ^2 carrying the conjugate representation of SL(2,C).
   In index notation corresponds to a Weyl fermion with indices ψ^{dot a}. -/
@@ -117,7 +118,7 @@ def rightHanded : Rep ℂ SL(2,ℂ) := Rep.of {
   map_mul' := fun M N => by
     ext1 x
     simp only [SpecialLinearGroup.coe_mul, RCLike.star_def, Matrix.map_mul, LinearMap.coe_mk,
-      AddHom.coe_mk, LinearMap.mul_apply, LinearEquiv.apply_symm_apply, mulVec_mulVec]}
+      AddHom.coe_mk, Module.End.mul_apply, LinearEquiv.apply_symm_apply, mulVec_mulVec]}
 
 /-- The standard basis on right-handed Weyl fermions. -/
 def rightBasis : Basis (Fin 2) ℂ rightHanded := Basis.ofEquivFun
@@ -154,7 +155,7 @@ def altRightHanded : Rep ℂ SL(2,ℂ) := Rep.of {
     simp
   map_mul' := fun M N => by
     ext1 x
-    simp only [SpecialLinearGroup.coe_mul, LinearMap.coe_mk, AddHom.coe_mk, LinearMap.mul_apply,
+    simp only [SpecialLinearGroup.coe_mul, LinearMap.coe_mk, AddHom.coe_mk, Module.End.mul_apply,
       LinearEquiv.apply_symm_apply, mulVec_mulVec, EmbeddingLike.apply_eq_iff_eq]
     refine (congrFun (congrArg _ ?_) _)
     rw [Matrix.mul_inv_rev]

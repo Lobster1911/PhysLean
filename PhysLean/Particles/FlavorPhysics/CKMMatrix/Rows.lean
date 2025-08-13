@@ -6,7 +6,6 @@ Authors: Joseph Tooby-Smith
 import PhysLean.Particles.FlavorPhysics.CKMMatrix.Basic
 import Mathlib.Analysis.SpecialFunctions.Complex.Arg
 import Mathlib.LinearAlgebra.CrossProduct
-import Mathlib.LinearAlgebra.FiniteDimensional.Basic
 import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 /-!
 # Rows for the CKM Matrix
@@ -205,7 +204,7 @@ noncomputable def rowBasis (V : CKMMatrix) : Basis (Fin 3) ℂ (Fin 3 → ℂ) :
 
 lemma cRow_cross_tRow_eq_uRow (V : CKMMatrix) :
     ∃ (κ : ℝ), [V]u = cexp (κ * I) • (conj [V]c ×₃ conj [V]t) := by
-  obtain ⟨g, hg⟩ := (mem_span_range_iff_exists_fun ℂ).mp (Basis.mem_span (rowBasis V)
+  obtain ⟨g, hg⟩ := (Submodule.mem_span_range_iff_exists_fun ℂ).mp (Basis.mem_span (rowBasis V)
     (conj [V]c ×₃ conj [V]t))
   simp only [Fin.sum_univ_three, rowBasis, Fin.isValue,
     coe_basisOfLinearIndependentOfCardEqFinrank, rows] at hg
@@ -245,11 +244,11 @@ lemma cRow_cross_tRow_eq_uRow (V : CKMMatrix) :
     have h3 := norm_nonneg (g 0)
     simp_all only [ofReal_neg, ofReal_one, Left.nonneg_neg_iff]
     have h4 : (0 : ℝ) < 1 := by norm_num
-    exact False.elim (lt_iff_not_le.mp h4 h3)
+    exact False.elim (lt_iff_not_ge.mp h4 h3)
 
 lemma uRow_cross_cRow_eq_tRow (V : CKMMatrix) :
     ∃ (τ : ℝ), [V]t = cexp (τ * I) • (conj ([V]u) ×₃ conj ([V]c)) := by
-  obtain ⟨g, hg⟩ := (mem_span_range_iff_exists_fun ℂ).mp (Basis.mem_span (rowBasis V)
+  obtain ⟨g, hg⟩ := (Submodule.mem_span_range_iff_exists_fun ℂ).mp (Basis.mem_span (rowBasis V)
     (conj ([V]u) ×₃ conj ([V]c)))
   rw [Fin.sum_univ_three, rowBasis] at hg
   simp only [Fin.isValue, coe_basisOfLinearIndependentOfCardEqFinrank, rows] at hg
@@ -278,7 +277,7 @@ lemma uRow_cross_cRow_eq_tRow (V : CKMMatrix) :
     have h3 := norm_nonneg (g 2)
     simp_all only [ofReal_neg, ofReal_one, Left.nonneg_neg_iff]
     have h4 : (0 : ℝ) < 1 := by norm_num
-    exact False.elim (lt_iff_not_le.mp h4 h3)
+    exact False.elim (lt_iff_not_ge.mp h4 h3)
   · have hx : [V]t = (g 2)⁻¹ • (conj ([V]u) ×₃ conj ([V]c)) := by
       rw [← hg, @smul_smul, inv_mul_cancel₀, one_smul]
       by_contra hn
@@ -347,7 +346,7 @@ lemma uRow_mul (V : CKMMatrix) (a b c : ℝ) :
   fin_cases i <;>
     change (phaseShiftApply V a b c 0 0 0).1 0 _ = _
   · simp only [Fin.isValue, ud, ofReal_zero, zero_mul, add_zero, uRow, Fin.zero_eta, cons_val_zero]
-  · simp only [Fin.isValue, us, ofReal_zero, zero_mul, add_zero, uRow, Fin.mk_one, cons_val_one,
+  · simp [Fin.isValue, us, ofReal_zero, zero_mul, add_zero, uRow, Fin.mk_one, cons_val_one,
     head_cons]
   · simp only [Fin.isValue, ub, ofReal_zero, zero_mul, add_zero, uRow, Fin.reduceFinMk,
     cons_val_two, Nat.succ_eq_add_one, Nat.reduceAdd, tail_cons, head_cons]
@@ -359,7 +358,7 @@ lemma cRow_mul (V : CKMMatrix) (a b c : ℝ) :
   fin_cases i <;>
     change (phaseShiftApply V a b c 0 0 0).1 1 _ = _
   · simp only [Fin.isValue, cd, ofReal_zero, zero_mul, add_zero, cRow, Fin.zero_eta, cons_val_zero]
-  · simp only [Fin.isValue, cs, ofReal_zero, zero_mul, add_zero, cRow, Fin.mk_one, cons_val_one,
+  · simp [Fin.isValue, cs, ofReal_zero, zero_mul, add_zero, cRow, Fin.mk_one, cons_val_one,
     head_cons]
   · simp only [Fin.isValue, cb, ofReal_zero, zero_mul, add_zero, cRow, Fin.reduceFinMk,
     cons_val_two, Nat.succ_eq_add_one, Nat.reduceAdd, tail_cons, head_cons]
@@ -371,7 +370,7 @@ lemma tRow_mul (V : CKMMatrix) (a b c : ℝ) :
   fin_cases i <;>
     change (phaseShiftApply V a b c 0 0 0).1 2 _ = _
   · simp only [Fin.isValue, td, ofReal_zero, zero_mul, add_zero, tRow, Fin.zero_eta, cons_val_zero]
-  · simp only [Fin.isValue, ts, ofReal_zero, zero_mul, add_zero, tRow, Fin.mk_one, cons_val_one,
+  · simp [Fin.isValue, ts, ofReal_zero, zero_mul, add_zero, tRow, Fin.mk_one, cons_val_one,
     head_cons]
   · simp only [Fin.isValue, tb, ofReal_zero, zero_mul, add_zero, tRow, Fin.reduceFinMk,
     cons_val_two, Nat.succ_eq_add_one, Nat.reduceAdd, tail_cons, head_cons]

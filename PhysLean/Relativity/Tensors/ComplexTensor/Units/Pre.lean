@@ -29,7 +29,7 @@ lemma contrCoUnitVal_expand_tmul : contrCoUnitVal =
     + complexContrBasis (Sum.inr 0) ⊗ₜ[ℂ] complexCoBasis (Sum.inr 0)
     + complexContrBasis (Sum.inr 1) ⊗ₜ[ℂ] complexCoBasis (Sum.inr 1)
     + complexContrBasis (Sum.inr 2) ⊗ₜ[ℂ] complexCoBasis (Sum.inr 2) := by
-  simp only [Action.instMonoidalCategory_tensorObj_V, contrCoUnitVal, Fin.isValue]
+  simp only [contrCoUnitVal, Fin.isValue]
   erw [contrCoToMatrix_symm_expand_tmul]
   simp only [Fintype.sum_sum_type, Finset.univ_unique, Fin.default_eq_zero, Fin.isValue,
     Finset.sum_singleton, Fin.sum_univ_three, ne_eq, reduceCtorEq, not_false_eq_true, one_apply_ne,
@@ -53,12 +53,10 @@ def contrCoUnit : 𝟙_ (Rep ℂ SL(2,ℂ)) ⟶ complexContr ⊗ complexCo where
   comm M := by
     refine ModuleCat.hom_ext ?_
     refine LinearMap.ext fun x : ℂ => ?_
-    simp only [Action.instMonoidalCategory_tensorObj_V, Action.instMonoidalCategory_tensorUnit_V,
-      Action.tensorUnit_ρ, CategoryTheory.Category.id_comp, Action.tensor_ρ, ModuleCat.hom_comp,
-      Function.comp_apply]
+    simp only [ModuleCat.hom_comp]
     change x • contrCoUnitVal =
       (TensorProduct.map (complexContr.ρ M) (complexCo.ρ M)) (x • contrCoUnitVal)
-    simp only [Action.instMonoidalCategory_tensorObj_V, _root_.map_smul]
+    simp only [map_smul]
     apply congrArg
     simp only [contrCoUnitVal]
     rw [contrCoToMatrix_ρ_symm]
@@ -103,12 +101,10 @@ def coContrUnit : 𝟙_ (Rep ℂ SL(2,ℂ)) ⟶ complexCo ⊗ complexContr where
   comm M := by
     refine ModuleCat.hom_ext ?_
     refine LinearMap.ext fun x : ℂ => ?_
-    simp only [Action.instMonoidalCategory_tensorObj_V, Action.instMonoidalCategory_tensorUnit_V,
-      Action.tensorUnit_ρ, CategoryTheory.Category.id_comp, Action.tensor_ρ, ModuleCat.hom_comp,
-      Function.comp_apply]
+    simp only [ModuleCat.hom_comp]
     change x • coContrUnitVal =
       (TensorProduct.map (complexCo.ρ M) (complexContr.ρ M)) (x • coContrUnitVal)
-    simp only [Action.instMonoidalCategory_tensorObj_V, _root_.map_smul]
+    simp only [map_smul]
     apply congrArg
     simp only [coContrUnitVal]
     rw [coContrToMatrix_ρ_symm]
@@ -133,29 +129,24 @@ lemma contr_contrCoUnit (x : complexCo) :
     ((coContrContraction ▷ complexCo).hom
     ((α_ _ _ complexCo).inv.hom
     (x ⊗ₜ[ℂ] contrCoUnit.hom (1 : ℂ)))) = x := by
-  obtain ⟨c, hc⟩ := (mem_span_range_iff_exists_fun ℂ).mp (Basis.mem_span complexCoBasis x)
+  obtain ⟨c, hc⟩ := (Submodule.mem_span_range_iff_exists_fun ℂ).mp (Basis.mem_span complexCoBasis x)
   subst hc
   rw [contrCoUnit_apply_one, contrCoUnitVal_expand_tmul]
-  simp only [Action.instMonoidalCategory_tensorObj_V, Action.instMonoidalCategory_tensorUnit_V,
-    Action.instMonoidalCategory_leftUnitor_hom_hom, Action.instMonoidalCategory_whiskerRight_hom,
-    Action.instMonoidalCategory_associator_inv_hom, CategoryTheory.Equivalence.symm_inverse,
+  simp only [Action.tensorObj_V, Action.tensorUnit_V, Action.leftUnitor_hom_hom,
+    Action.whiskerRight_hom, Action.associator_inv_hom, CategoryTheory.Equivalence.symm_inverse,
     Action.functorCategoryEquivalence_functor, Action.FunctorCategoryEquivalence.functor_obj_obj,
     Fintype.sum_sum_type, Finset.univ_unique, Fin.default_eq_zero, Fin.isValue,
     Finset.sum_singleton, Fin.sum_univ_three, tmul_add, add_tmul, smul_tmul, tmul_smul, map_add,
-    _root_.map_smul]
-  have h1' (x y : complexCo.V) (z : complexContr.V) :
-    (α_ complexCo.V complexContr.V complexCo.V).inv (x ⊗ₜ[ℂ] z ⊗ₜ[ℂ] y) = (x ⊗ₜ[ℂ] z) ⊗ₜ[ℂ] y := rfl
-  repeat rw [h1']
+    map_smul, ModuleCat.MonoidalCategory.associator_inv_apply]
   have h1'' (y : complexCo.V)
     (z : complexCo.V ⊗[ℂ] complexContr.V) :
     (coContrContraction.hom ▷ complexCo.V) (z ⊗ₜ[ℂ] y) = (coContrContraction.hom z) ⊗ₜ[ℂ] y := rfl
   repeat rw (config := { transparency := .instances }) [h1'']
   repeat rw [coContrContraction_basis']
-  simp only [Fin.isValue, leftUnitor, ModuleCat.MonoidalCategory.leftUnitor, ModuleCat.of_coe,
-    CategoryTheory.Iso.trans_hom, ModuleCat.ofSelfIso_hom,
-    CategoryTheory.Category.comp_id, ↓reduceIte,
-    reduceCtorEq, zero_tmul, map_zero, smul_zero, add_zero, Sum.inr.injEq, one_ne_zero,
-    Fin.reduceEq, zero_add, zero_ne_one]
+  simp only [Fin.isValue, leftUnitor, ModuleCat.MonoidalCategory.leftUnitor,
+    LinearEquiv.toModuleIso_hom, ModuleCat.hom_ofHom, Action.tensorUnit_V, ↓reduceIte,
+    LinearEquiv.coe_coe, reduceCtorEq, zero_tmul, map_zero, smul_zero, add_zero, Sum.inr.injEq,
+    one_ne_zero, Fin.reduceEq, zero_add, zero_ne_one]
   erw [TensorProduct.lid_tmul, TensorProduct.lid_tmul, TensorProduct.lid_tmul,
     TensorProduct.lid_tmul]
   simp only [Fin.isValue, one_smul]
@@ -167,27 +158,23 @@ lemma contr_coContrUnit (x : complexContr) :
     ((contrCoContraction ▷ complexContr).hom
     ((α_ _ _ complexContr).inv.hom
     (x ⊗ₜ[ℂ] coContrUnit.hom (1 : ℂ)))) = x := by
-  obtain ⟨c, hc⟩ := (mem_span_range_iff_exists_fun ℂ).mp (Basis.mem_span complexContrBasis x)
+  obtain ⟨c, hc⟩ := (Submodule.mem_span_range_iff_exists_fun ℂ).mp
+    (Basis.mem_span complexContrBasis x)
   subst hc
   rw [coContrUnit_apply_one, coContrUnitVal_expand_tmul]
-  simp only [Action.instMonoidalCategory_tensorObj_V, Action.instMonoidalCategory_tensorUnit_V,
-    Action.instMonoidalCategory_leftUnitor_hom_hom, Action.instMonoidalCategory_whiskerRight_hom,
-    Action.instMonoidalCategory_associator_inv_hom, CategoryTheory.Equivalence.symm_inverse,
+  simp only [Action.tensorObj_V, Action.tensorUnit_V, Action.leftUnitor_hom_hom,
+    Action.whiskerRight_hom, Action.associator_inv_hom, CategoryTheory.Equivalence.symm_inverse,
     Action.functorCategoryEquivalence_functor, Action.FunctorCategoryEquivalence.functor_obj_obj,
     Fintype.sum_sum_type, Finset.univ_unique, Fin.default_eq_zero, Fin.isValue,
     Finset.sum_singleton, Fin.sum_univ_three, tmul_add, add_tmul, smul_tmul, tmul_smul, map_add,
-    _root_.map_smul]
-  have h1' (x y : complexContr.V) (z : complexCo.V) :
-    (α_ complexContr.V complexCo.V complexContr.V).inv
-    (x ⊗ₜ[ℂ] z ⊗ₜ[ℂ] y) = (x ⊗ₜ[ℂ] z) ⊗ₜ[ℂ] y := rfl
-  repeat rw [h1']
+    map_smul, ModuleCat.MonoidalCategory.associator_inv_apply]
   have h1'' (y : complexContr.V)
     (z : complexContr.V ⊗[ℂ] complexCo.V) :
     (contrCoContraction.hom ▷ complexContr.V) (z ⊗ₜ[ℂ] y) =
     (contrCoContraction.hom z) ⊗ₜ[ℂ] y := rfl
   repeat rw (config := { transparency := .instances }) [h1'']
   repeat rw [contrCoContraction_basis']
-  simp only [Fin.isValue, Action.instMonoidalCategory_tensorUnit_V, ↓reduceIte, reduceCtorEq,
+  simp only [Fin.isValue, Action.tensorUnit_V, ↓reduceIte, reduceCtorEq,
     zero_tmul, map_zero, smul_zero, add_zero, Sum.inr.injEq, one_ne_zero, Fin.reduceEq, zero_add,
     zero_ne_one]
   erw [TensorProduct.lid_tmul, TensorProduct.lid_tmul, TensorProduct.lid_tmul,

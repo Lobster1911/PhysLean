@@ -3,9 +3,7 @@ Copyright (c) 2025 Joseph Tooby-Smith. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Joseph Tooby-Smith
 -/
-import PhysLean.QFT.PerturbationTheory.WickContraction.TimeContract
-import PhysLean.QFT.PerturbationTheory.WickContraction.StaticContract
-import PhysLean.QFT.PerturbationTheory.FieldOpAlgebra.TimeContraction
+import PhysLean.QFT.PerturbationTheory.WickContraction.UncontractedList
 /-!
 
 # Sub contractions
@@ -18,7 +16,6 @@ variable {𝓕 : FieldSpecification}
 namespace WickContraction
 variable {n : ℕ} {φs : List 𝓕.FieldOp} {φsΛ : WickContraction φs.length}
 open PhysLean.List
-open FieldOpAlgebra
 
 /-- Given a Wick contraction `φsΛ`, and a subset of `φsΛ.1`, the Wick contraction
   consisting of contracted pairs within that subset. -/

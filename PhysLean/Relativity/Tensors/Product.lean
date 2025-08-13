@@ -19,9 +19,9 @@ open OverColor
 
 namespace Tensor
 
-variable {k G : Type} [CommRing k] [Group G]
-  {S : TensorSpecies k G} {n n' n2 : ℕ} {c : Fin n → S.C} {c' : Fin n' → S.C}
-  {c2 : Fin n2 → S.C}
+variable {k C G : Type} [CommRing k] [Group G]
+  {S : TensorSpecies k C G} {n n' n2 : ℕ} {c : Fin n → C} {c' : Fin n' → C}
+  {c2 : Fin n2 → C}
 
 /-!
 
@@ -38,19 +38,19 @@ TODO "6VZ3N" "Change products of tensors to use `Fin.append` rather then
 
 /-- The equivalence between `ComponentIdx (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm)` and
   `Π (i : Fin n1 ⊕ Fin n2), Fin (S.repDim (Sum.elim c c1 i))`. -/
-def ComponentIdx.prodEquiv {n1 n2 : ℕ} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C} :
-    ComponentIdx (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm) ≃
+def ComponentIdx.prodEquiv {n1 n2 : ℕ} {c : Fin n1 → C} {c1 : Fin n2 → C} :
+    ComponentIdx (S := S) (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm) ≃
     Π (i : Fin n1 ⊕ Fin n2), Fin (S.repDim (Sum.elim c c1 i)) :=
   (Equiv.piCongr finSumFinEquiv (fun _ => finCongr (by simp))).symm
 
 /-- The product of two component indices. -/
-def ComponentIdx.prod {n1 n2 : ℕ} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
-    (b : ComponentIdx c) (b1 : ComponentIdx c1) :
-    ComponentIdx (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm) :=
+def ComponentIdx.prod {n1 n2 : ℕ} {c : Fin n1 → C} {c1 : Fin n2 → C}
+    (b : ComponentIdx (S := S) c) (b1 : ComponentIdx (S := S) c1) :
+    ComponentIdx (S := S) (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm) :=
   ComponentIdx.prodEquiv.symm fun | Sum.inl i => b i | Sum.inr i => b1 i
 
-lemma ComponentIdx.prod_apply_finSumFinEquiv {n1 n2 : ℕ} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
-    (b : ComponentIdx c) (b1 : ComponentIdx c1) (i : Fin n1 ⊕ Fin n2) :
+lemma ComponentIdx.prod_apply_finSumFinEquiv {n1 n2 : ℕ} {c : Fin n1 → C} {c1 : Fin n2 → C}
+    (b : ComponentIdx c) (b1 : ComponentIdx (S := S) c1) (i : Fin n1 ⊕ Fin n2) :
     ComponentIdx.prod b b1 (finSumFinEquiv i) =
     match i with
     | Sum.inl i => Fin.cast (by simp) (b i)
@@ -67,8 +67,9 @@ lemma ComponentIdx.prod_apply_finSumFinEquiv {n1 n2 : ℕ} {c : Fin n1 → S.C} 
 
 /-- The equivalence between `ComponentIdx (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm)` and
   `ComponentIdx c × ComponentIdx c1` formed by products. -/
-def ComponentIdx.splitEquiv {n1 n2 : ℕ} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C} :
-    ComponentIdx (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm) ≃ ComponentIdx c × ComponentIdx c1 where
+def ComponentIdx.splitEquiv {n1 n2 : ℕ} {c : Fin n1 → C} {c1 : Fin n2 → C} :
+    ComponentIdx (S := S) (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm) ≃
+      ComponentIdx (S := S) c × ComponentIdx (S := S) c1 where
   toFun p := (fun i => (prodEquiv p) (Sum.inl i), fun i => (prodEquiv p) (Sum.inr i))
   invFun p := ComponentIdx.prod (p.1) (p.2)
   left_inv p := by
@@ -100,7 +101,7 @@ def ComponentIdx.splitEquiv {n1 n2 : ℕ} {c : Fin n1 → S.C} {c1 : Fin n2 → 
 
 /-- The equivalence between pure tensors based on a product of lists of indices, and
   the type `Π (i : Fin n1 ⊕ Fin n2), S.FD.obj (Discrete.mk ((Sum.elim c c1) i))`. -/
-def Pure.prodEquiv {n1 n2 : ℕ} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C} :
+def Pure.prodEquiv {n1 n2 : ℕ} {c : Fin n1 → C} {c1 : Fin n2 → C} :
     Pure S (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm) ≃
     Π (i : Fin n1 ⊕ Fin n2), S.FD.obj (Discrete.mk ((Sum.elim c c1) i)) :=
   (Equiv.piCongr finSumFinEquiv
@@ -110,11 +111,11 @@ def Pure.prodEquiv {n1 n2 : ℕ} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C} :
 /-- Given two pure tensors `p1 : Pure S c` and `p2 : Pure S c`, `prodP p p2` is the tensor
   product of those tensors returning an element in
   `Pure S (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm)`. -/
-def Pure.prodP {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
+def Pure.prodP {n1 n2} {c : Fin n1 → C} {c1 : Fin n2 → C}
     (p1 : Pure S c) (p2 : Pure S c1) : Pure S (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm) :=
   Pure.prodEquiv.symm fun | Sum.inl i => p1 i | Sum.inr i => p2 i
 
-lemma Pure.prodP_apply_finSumFinEquiv {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
+lemma Pure.prodP_apply_finSumFinEquiv {n1 n2} {c : Fin n1 → C} {c1 : Fin n2 → C}
     (p1 : Pure S c) (p2 : Pure S c1) (i : Fin n1 ⊕ Fin n2) :
     Pure.prodP p1 p2 (finSumFinEquiv i) =
     match i with
@@ -131,7 +132,7 @@ lemma Pure.prodP_apply_finSumFinEquiv {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 
     rfl
 
 @[simp]
-lemma Pure.prodP_apply_castAdd {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
+lemma Pure.prodP_apply_castAdd {n1 n2} {c : Fin n1 → C} {c1 : Fin n2 → C}
     (p1 : Pure S c) (p2 : Pure S c1) (i : Fin n1) :
     Pure.prodP p1 p2 (Fin.castAdd n2 i) =
     S.FD.map (eqToHom (by simp)) (p1 i) := by
@@ -141,7 +142,7 @@ lemma Pure.prodP_apply_castAdd {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C
   simp
 
 @[simp]
-lemma Pure.prodP_apply_natAdd {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
+lemma Pure.prodP_apply_natAdd {n1 n2} {c : Fin n1 → C} {c1 : Fin n2 → C}
     (p1 : Pure S c) (p2 : Pure S c1) (i : Fin n2) :
     Pure.prodP p1 p2 (Fin.natAdd n1 i) =
     S.FD.map (eqToHom (by simp)) (p2 i) := by
@@ -150,14 +151,14 @@ lemma Pure.prodP_apply_natAdd {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
   rw [Pure.prodP_apply_finSumFinEquiv]
   simp
 
-lemma Pure.prodP_basisVector {n n1 : ℕ} {c : Fin n → S.C} {c1 : Fin n1 → S.C}
-    (b : ComponentIdx c) (b1 : ComponentIdx c1) :
+lemma Pure.prodP_basisVector {n n1 : ℕ} {c : Fin n → C} {c1 : Fin n1 → C}
+    (b : ComponentIdx c) (b1 : ComponentIdx (S := S) c1) :
     Pure.prodP (Pure.basisVector c b) (Pure.basisVector c1 b1) =
     Pure.basisVector _ (b.prod b1) := by
   ext i
   obtain ⟨i, rfl⟩ := finSumFinEquiv.surjective i
   rw [Pure.prodP_apply_finSumFinEquiv]
-  have basis_congr {c1 c2 : S.C} (h : c1 = c2) (x : Fin (S.repDim c1))
+  have basis_congr {c1 c2 : C} (h : c1 = c2) (x : Fin (S.repDim c1))
     (y : Fin (S.repDim c2)) (hxy : y = Fin.cast (by simp [h]) x) :
       S.FD.map (eqToHom (by simp [h])) ((S.basis c1) x) =
       (S.basis c2) y := by
@@ -177,14 +178,14 @@ lemma Pure.prodP_basisVector {n n1 : ℕ} {c : Fin n → S.C} {c1 : Fin n1 → S
 
 /-- The equivalence between the type `S.F.obj (OverColor.mk (Sum.elim c c1))` and the type
   `S.Tensor (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm)`. -/
-noncomputable def prodEquiv {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C} :
+noncomputable def prodEquiv {n1 n2} {c : Fin n1 → C} {c1 : Fin n2 → C} :
     S.F.obj (OverColor.mk (Sum.elim c c1)) ≃ₗ[k] S.Tensor (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm) :=
   ((Action.forget _ _).mapIso (S.F.mapIso (OverColor.equivToIso finSumFinEquiv))).toLinearEquiv
 
 TODO "6VZ3U" "Determine in `prodEquiv_symm_pure` why in `rw (transparency := .instances) [h1]`
   `(transparency := .instances)` is needed. As a first step adding this as a comment here."
 
-lemma prodEquiv_symm_pure {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
+lemma prodEquiv_symm_pure {n1 n2} {c : Fin n1 → C} {c1 : Fin n2 → C}
     (p : Pure S (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm)) :
     prodEquiv.symm p.toTensor = PiTensorProduct.tprod k (Pure.prodEquiv p) := by
   rw [prodEquiv]
@@ -197,7 +198,7 @@ lemma prodEquiv_symm_pure {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
 
 /-- The tensor product of two tensors as a bi-linear map from
   `S.Tensor c` and `S.Tensor c1` to `S.Tensor (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm)`. -/
-noncomputable def prodT {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C} :
+noncomputable def prodT {n1 n2} {c : Fin n1 → C} {c1 : Fin n2 → C} :
     S.Tensor c →ₗ[k] S.Tensor c1 →ₗ[k] S.Tensor (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm) := by
   refine LinearMap.mk₂ k ?_ ?_ ?_ ?_ ?_
   · exact fun t1 t2 => prodEquiv ((Functor.LaxMonoidal.μ S.F _ _).hom (t1 ⊗ₜ t2))
@@ -210,7 +211,7 @@ noncomputable def prodT {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C} :
   · intro n t1 t2
     simp [TensorProduct.tmul_smul]
 
-lemma prodT_pure {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
+lemma prodT_pure {n1 n2} {c : Fin n1 → C} {c1 : Fin n2 → C}
     (t : Pure S c) (t1 : Pure S c1) :
     (t.toTensor).prodT (t1.toTensor) = (Pure.prodP t t1).toTensor := by
   simp only [prodT, LinearMap.mk₂_apply]
@@ -219,8 +220,7 @@ lemma prodT_pure {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
     rw [Pure.μ_toTensor_tmul_toTensor]
   change prodEquiv.toEquiv _ = _
   rw [Equiv.apply_eq_iff_eq_symm_apply]
-  simp only [instMonoidalCategoryStruct_tensorObj_left, instMonoidalCategoryStruct_tensorObj_hom,
-    Functor.id_obj, LinearEquiv.coe_toEquiv_symm, EquivLike.coe_coe]
+  simp only [Functor.id_obj, LinearEquiv.coe_toEquiv_symm, EquivLike.coe_coe]
   rw [prodEquiv_symm_pure]
   congr
   simp only [Pure.prodP, Equiv.apply_symm_apply]
@@ -307,7 +307,7 @@ def prodSwapMap (n1 n2 : ℕ) : Fin (n1 + n2) → Fin (n2 + n1) :=
     finSumFinEquiv ∘ Sum.swap ∘ finSumFinEquiv.symm
 
 @[simp]
-lemma prodLeftMap_permCond {σ : Fin n' → Fin n} (c2 : Fin n2 → S.C) (h : PermCond c c' σ) :
+lemma prodLeftMap_permCond {σ : Fin n' → Fin n} (c2 : Fin n2 → C) (h : PermCond c c' σ) :
     PermCond (Sum.elim c c2 ∘ finSumFinEquiv.symm)
       (Sum.elim c' c2 ∘ finSumFinEquiv.symm) (prodLeftMap n2 σ) := by
   apply And.intro
@@ -326,7 +326,7 @@ lemma prodLeftMap_permCond {σ : Fin n' → Fin n} (c2 : Fin n2 → S.C) (h : Pe
     | Sum.inr i => rfl
 
 @[simp]
-lemma prodRightMap_permCond {σ : Fin n' → Fin n} (c2 : Fin n2 → S.C) (h : PermCond c c' σ) :
+lemma prodRightMap_permCond {σ : Fin n' → Fin n} (c2 : Fin n2 → C) (h : PermCond c c' σ) :
     PermCond (Sum.elim c2 c ∘ finSumFinEquiv.symm)
       (Sum.elim c2 c' ∘ finSumFinEquiv.symm) (prodRightMap n2 σ) := by
   apply And.intro
@@ -345,7 +345,7 @@ lemma prodRightMap_permCond {σ : Fin n' → Fin n} (c2 : Fin n2 → S.C) (h : P
     | Sum.inr i => simp [h.2]
 
 @[simp]
-lemma prodSwapMap_permCond {n1 n2 : ℕ} {c : Fin n1 → S.C} {c2 : Fin n2 → S.C} :
+lemma prodSwapMap_permCond {n1 n2 : ℕ} {c : Fin n1 → C} {c2 : Fin n2 → C} :
     PermCond (Sum.elim c c2 ∘ finSumFinEquiv.symm)
       (Sum.elim c2 c ∘ finSumFinEquiv.symm) (prodSwapMap n2 n1) := by
   apply And.intro
@@ -361,8 +361,8 @@ lemma prodSwapMap_permCond {n1 n2 : ℕ} {c : Fin n1 → S.C} {c2 : Fin n2 → S
     | Sum.inr i => rfl
 
 @[simp]
-lemma prodAssocMap_permCond {n1 n2 n3 : ℕ} {c : Fin n1 → S.C} {c2 : Fin n2 → S.C}
-    {c3 : Fin n3 → S.C} :
+lemma prodAssocMap_permCond {n1 n2 n3 : ℕ} {c : Fin n1 → C} {c2 : Fin n2 → C}
+    {c3 : Fin n3 → C} :
     PermCond (Sum.elim c (Sum.elim c2 c3 ∘ finSumFinEquiv.symm) ∘ finSumFinEquiv.symm)
     (Sum.elim (Sum.elim c c2 ∘ finSumFinEquiv.symm) c3 ∘ finSumFinEquiv.symm)
     (prodAssocMap n1 n2 n3) := by
@@ -394,8 +394,8 @@ lemma prodAssocMap_permCond {n1 n2 n3 : ℕ} {c : Fin n1 → S.C} {c2 : Fin n2 �
       exact Nat.add_assoc n1 n2 ↑i
 
 @[simp]
-lemma prodAssocMap'_permCond {n1 n2 n3 : ℕ} {c : Fin n1 → S.C} {c2 : Fin n2 → S.C}
-    {c3 : Fin n3 → S.C} : PermCond
+lemma prodAssocMap'_permCond {n1 n2 n3 : ℕ} {c : Fin n1 → C} {c2 : Fin n2 → C}
+    {c3 : Fin n3 → C} : PermCond
       (Sum.elim (Sum.elim c c2 ∘ finSumFinEquiv.symm) c3 ∘ finSumFinEquiv.symm)
       (Sum.elim c (Sum.elim c2 c3 ∘ finSumFinEquiv.symm) ∘ finSumFinEquiv.symm)
       (prodAssocMap' n1 n2 n3) := by
@@ -432,7 +432,7 @@ lemma prodAssocMap'_permCond {n1 n2 n3 : ℕ} {c : Fin n1 → S.C} {c2 : Fin n2 
 
 -/
 
-lemma Pure.prodP_component {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
+lemma Pure.prodP_component {n m : ℕ} {c : Fin n → C} {c1 : Fin m → C}
     (p : Pure S c) (p1 : Pure S c1)
     (b : ComponentIdx (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm)) :
     (p.prodP p1).component b = p.component (ComponentIdx.splitEquiv b).1 *
@@ -456,7 +456,7 @@ lemma Pure.prodP_component {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
     rw [S.basis_congr_repr h2]
     rfl
 
-lemma prodT_basis_repr_apply {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C}
+lemma prodT_basis_repr_apply {n m : ℕ} {c : Fin n → C} {c1 : Fin m → C}
     (t : Tensor S c) (t1 : Tensor S c1)
     (b : ComponentIdx (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm)) :
     (basis (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm)).repr (prodT t t1) b =
@@ -484,7 +484,7 @@ lemma prodT_basis_repr_apply {n m : ℕ} {c : Fin n → S.C} {c1 : Fin m → S.C
     ring_nf
 
 @[simp]
-lemma Pure.prodP_equivariant {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
+lemma Pure.prodP_equivariant {n1 n2} {c : Fin n1 → C} {c1 : Fin n2 → C}
     (g : G) (p : Pure S c) (p1 : Pure S c1) :
     prodP (g • p) (g • p1) = g • prodP p p1 := by
   ext i
@@ -509,7 +509,7 @@ lemma Pure.prodP_equivariant {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
     exact h1'
 
 @[simp]
-lemma prodT_equivariant {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
+lemma prodT_equivariant {n1 n2} {c : Fin n1 → C} {c1 : Fin n2 → C}
     (g : G) (t : S.Tensor c) (t1 : S.Tensor c1) :
     prodT (g • t) (g • t1) = g • prodT t t1 := by
   let P (t : S.Tensor c) := prodT (g • t) (g • t1) = g • prodT t t1
@@ -532,10 +532,10 @@ lemma prodT_equivariant {n1 n2} {c : Fin n1 → S.C} {c1 : Fin n2 → S.C}
   · intro t1 t2 h1 h2
     simp_all only [actionT_add, map_add, LinearMap.add_apply, P]
 
-lemma Pure.prodP_swap {n n1} {c : Fin n → S.C}
-    {c1 : Fin n1 → S.C}
+lemma Pure.prodP_swap {n n1} {c : Fin n → C}
+    {c1 : Fin n1 → C}
     (p : Pure S c) (p1 : Pure S c1) :
-    Pure.prodP p p1 = permP (prodSwapMap n n1) (prodSwapMap_permCond) (Pure.prodP p1 p) := by
+    Pure.prodP p p1 = permP (prodSwapMap n n1) prodSwapMap_permCond (Pure.prodP p1 p) := by
   ext i
   obtain ⟨i, rfl⟩ := finSumFinEquiv.surjective i
   match i with
@@ -548,8 +548,8 @@ lemma Pure.prodP_swap {n n1} {c : Fin n → S.C}
     rw [← congr_right (p1.prodP p) _ (Fin.castAdd n i) (by simp [prodSwapMap])]
     simp [map_map_apply]
 
-lemma prodT_swap {n n1} {c : Fin n → S.C}
-    {c1 : Fin n1 → S.C}
+lemma prodT_swap {n n1} {c : Fin n → C}
+    {c1 : Fin n1 → C}
     (t : S.Tensor c) (t1 : S.Tensor c1) :
     prodT t t1 = permT (prodSwapMap n n1) (prodSwapMap_permCond) (prodT t1 t) := by
   let P (t : S.Tensor c) := prodT t t1 = permT (prodSwapMap n n1) (prodSwapMap_permCond)
@@ -574,7 +574,7 @@ lemma prodT_swap {n n1} {c : Fin n → S.C}
     simp_all only [actionT_add, map_add, LinearMap.add_apply, P]
 
 @[simp]
-lemma Pure.prodP_permP_left {n n'} {c : Fin n → S.C} {c' : Fin n' → S.C}
+lemma Pure.prodP_permP_left {n n'} {c : Fin n → C} {c' : Fin n' → C}
     (σ : Fin n' → Fin n) (h : PermCond c c' σ) (p : Pure S c) (p2 : Pure S c2) :
     Pure.prodP (permP σ h p) p2 = permP (prodLeftMap n2 σ)
       (prodLeftMap_permCond c2 h) (Pure.prodP p p2) := by
@@ -602,7 +602,7 @@ lemma Pure.prodP_permP_left {n n'} {c : Fin n → S.C} {c' : Fin n' → S.C}
     simp [permP, map_map_apply]
 
 @[simp]
-lemma prodT_permT_left {n n'} {c : Fin n → S.C} {c' : Fin n' → S.C}
+lemma prodT_permT_left {n n'} {c : Fin n → C} {c' : Fin n' → C}
     (σ : Fin n' → Fin n) (h : PermCond c c' σ) (t : S.Tensor c) (t2 : S.Tensor c2) :
     prodT (permT σ h t) t2 = permT (prodLeftMap n2 σ) (prodLeftMap_permCond c2 h) (prodT t t2) := by
   let P (t : S.Tensor c) := prodT (permT σ h t) t2 =
@@ -629,7 +629,7 @@ lemma prodT_permT_left {n n'} {c : Fin n → S.C} {c' : Fin n' → S.C}
     simp_all only [actionT_add, map_add, LinearMap.add_apply, P]
 
 @[simp]
-lemma Pure.prodP_permP_right {n n'} {c : Fin n → S.C} {c' : Fin n' → S.C}
+lemma Pure.prodP_permP_right {n n'} {c : Fin n → C} {c' : Fin n' → C}
     (σ : Fin n' → Fin n) (h : PermCond c c' σ) (p : Pure S c) (p2 : Pure S c2) :
     prodP p2 (permP σ h p) = permP (prodRightMap n2 σ)
       (prodRightMap_permCond c2 h) (Pure.prodP p2 p) := by
@@ -646,7 +646,7 @@ lemma Pure.prodP_permP_right {n n'} {c : Fin n → S.C} {c' : Fin n' → S.C}
   · rfl
 
 @[simp]
-lemma prodT_permT_right {n n'} {c : Fin n → S.C} {c' : Fin n' → S.C}
+lemma prodT_permT_right {n n'} {c : Fin n → C} {c' : Fin n' → C}
     (σ : Fin n' → Fin n) (h : PermCond c c' σ) (t : S.Tensor c) (t2 : S.Tensor c2) :
     prodT t2 (permT σ h t) = permT (prodRightMap n2 σ)
     (prodRightMap_permCond c2 h) (prodT t2 t) := by
@@ -662,11 +662,11 @@ lemma prodT_permT_right {n n'} {c : Fin n → S.C} {c' : Fin n' → S.C}
     | Sum.inr i => rfl
   · rfl
 
-lemma Pure.prodP_assoc {n n1 n2} {c : Fin n → S.C}
-    {c1 : Fin n1 → S.C} {c2 : Fin n2 → S.C}
+lemma Pure.prodP_assoc {n n1 n2} {c : Fin n → C}
+    {c1 : Fin n1 → C} {c2 : Fin n2 → C}
     (p : Pure S c) (p1 : Pure S c1) (p2 : Pure S c2) :
     prodP (Pure.prodP p p1) p2 =
-    permP (prodAssocMap n n1 n2) (prodAssocMap_permCond) (Pure.prodP p (Pure.prodP p1 p2)) := by
+    permP (prodAssocMap n n1 n2) prodAssocMap_permCond (Pure.prodP p (Pure.prodP p1 p2)) := by
   ext i
   obtain ⟨i, rfl⟩ := finSumFinEquiv.surjective i
   match i with
@@ -687,13 +687,13 @@ lemma Pure.prodP_assoc {n n1 n2} {c : Fin n → S.C}
     rw [← congr_right (p.prodP (p1.prodP p2)) _ _ (prodAssocMap_natAdd i)]
     simp [map_map_apply]
 
-lemma prodT_assoc {n n1 n2} {c : Fin n → S.C}
-    {c1 : Fin n1 → S.C} {c2 : Fin n2 → S.C}
+lemma prodT_assoc {n n1 n2} {c : Fin n → C}
+    {c1 : Fin n1 → C} {c2 : Fin n2 → C}
     (t : S.Tensor c) (t1 : S.Tensor c1) (t2 : S.Tensor c2) :
     prodT (prodT t t1) t2 =
-    permT (prodAssocMap n n1 n2) (prodAssocMap_permCond) (prodT t (prodT t1 t2)) := by
+    permT (prodAssocMap n n1 n2) prodAssocMap_permCond (prodT t (prodT t1 t2)) := by
   let P (t : S.Tensor c) (t1 : S.Tensor c1) (t2 : S.Tensor c2) := prodT (prodT t t1) t2 =
-    permT (prodAssocMap n n1 n2) (prodAssocMap_permCond) (prodT t (prodT t1 t2))
+    permT (prodAssocMap n n1 n2) prodAssocMap_permCond (prodT t (prodT t1 t2))
   let P1 (t : S.Tensor c) := P t t1 t2
   change P1 t
   refine induction_on_pure ?_
@@ -720,8 +720,8 @@ lemma prodT_assoc {n n1 n2} {c : Fin n → S.C}
   simp only [P3, P, P2, P1]
   rw [prodT_pure, prodT_pure, prodT_pure, prodT_pure, permT_pure, Pure.prodP_assoc]
 
-lemma Pure.prodP_assoc' {n n1 n2} {c : Fin n → S.C}
-    {c1 : Fin n1 → S.C} {c2 : Fin n2 → S.C}
+lemma Pure.prodP_assoc' {n n1 n2} {c : Fin n → C}
+    {c1 : Fin n1 → C} {c2 : Fin n2 → C}
     (p : Pure S c) (p1 : Pure S c1) (p2 : Pure S c2) :
     prodP p (prodP p1 p2) =
     permP (prodAssocMap' n n1 n2) (prodAssocMap'_permCond) (prodP (prodP p p1) p2) := by
@@ -745,8 +745,8 @@ lemma Pure.prodP_assoc' {n n1 n2} {c : Fin n → S.C}
       rw [← congr_right ((p.prodP p1).prodP p2) _ _ (prodAssocMap'_natAdd_natAdd i)]
       simp [map_map_apply]
 
-lemma prodT_assoc' {n n1 n2} {c : Fin n → S.C}
-    {c1 : Fin n1 → S.C} {c2 : Fin n2 → S.C}
+lemma prodT_assoc' {n n1 n2} {c : Fin n → C}
+    {c1 : Fin n1 → C} {c2 : Fin n2 → C}
     (t : S.Tensor c) (t1 : S.Tensor c1) (t2 : S.Tensor c2) :
     prodT t (prodT t1 t2) =
     permT (prodAssocMap' n n1 n2) (prodAssocMap'_permCond) (prodT (prodT t t1) t2) := by
@@ -778,8 +778,8 @@ lemma prodT_assoc' {n n1 n2} {c : Fin n → S.C}
   simp only [P3, P, P2, P1]
   rw [prodT_pure, prodT_pure, prodT_pure, prodT_pure, permT_pure, Pure.prodP_assoc']
 
-lemma Pure.prodP_zero_right_permCond {n} {c : Fin n → S.C}
-    {c1 : Fin 0 → S.C} : PermCond c (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm) id := by
+lemma Pure.prodP_zero_right_permCond {n} {c : Fin n → C}
+    {c1 : Fin 0 → C} : PermCond c (Sum.elim c c1 ∘ ⇑finSumFinEquiv.symm) id := by
   simp only [Nat.add_zero, PermCond.on_id, Function.comp_apply]
   intro i
   obtain ⟨j, hi⟩ := finSumFinEquiv.surjective (Fin.cast (by rfl) i : Fin (n + 0))
@@ -790,9 +790,9 @@ lemma Pure.prodP_zero_right_permCond {n} {c : Fin n → S.C}
   | Sum.inl j => rfl
   | Sum.inr j => exact Fin.elim0 j
 
-lemma Pure.prodP_zero_right {n} {c : Fin n → S.C}
-    {c1 : Fin 0 → S.C} (p : Pure S c) (p0 : Pure S c1) :
-    prodP p p0 = permP id (prodP_zero_right_permCond) p := by
+lemma Pure.prodP_zero_right {n} {c : Fin n → C}
+    {c1 : Fin 0 → C} (p : Pure S c) (p0 : Pure S c1) :
+    prodP p p0 = permP id prodP_zero_right_permCond p := by
   ext i
   obtain ⟨j, hi⟩ := finSumFinEquiv.surjective (Fin.cast (by rfl) i : Fin (n + 0))
   simp only [Nat.add_zero, Fin.cast_eq_self] at hi
@@ -802,8 +802,8 @@ lemma Pure.prodP_zero_right {n} {c : Fin n → S.C}
   | Sum.inl j => rfl
   | Sum.inr j => exact Fin.elim0 j
 
-lemma prodT_default_right {n} {c : Fin n → S.C}
-    {c1 : Fin 0 → S.C} (t : S.Tensor c) :
+lemma prodT_default_right {n} {c : Fin n → C}
+    {c1 : Fin 0 → C} (t : S.Tensor c) :
     prodT t (Pure.toTensor default : S.Tensor c1) =
     permT id (Pure.prodP_zero_right_permCond) t := by
   let P (t : S.Tensor c) := prodT t (Pure.toTensor default : S.Tensor c1)

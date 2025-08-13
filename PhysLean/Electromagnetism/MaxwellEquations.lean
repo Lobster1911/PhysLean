@@ -8,68 +8,51 @@ import PhysLean.Electromagnetism.Basic
 
 # Maxwell's equations
 
+Note that currently the equations are defined for isotropic and homogeneous domains.
+
 -/
 
 namespace Electromagnetism
 
-/-- An electromagnetic system consists of charge density, a current density,
-  the speed of light and the electric permittivity. -/
-structure EMSystem where
-  /-- The speed of light. -/
-  c : ℝ
+/-- An optcial medium refers to an isotropic medium
+  (which may or may not be free space)
+  which consists of the electric permittivity
+  and the magnetic permeability. -/
+structure OpticalMedium where
   /-- The permittivity. -/
-  ε₀ : ℝ
+  ε : ℝ
+  /-- The permeability. -/
+  μ : ℝ
+  eps_ge_zero : ε > 0
+  mu_ge_zero : μ > 0
 
-TODO "6V2UZ" "Charge density and current density should be generalized to signed measures,
-  in such a way
-  that they are still easy to work with and can be integrated with with tensor notation.
-  See here:
-  https://leanprover.zulipchat.com/#narrow/channel/479953-PhysLean/topic/Maxwell's.20Equations"
-
-/-- The charge density. -/
-abbrev ChargeDensity := SpaceTime → ℝ
-
-/-- Current density. -/
-abbrev CurrentDensity := SpaceTime → EuclideanSpace ℝ (Fin 3)
-
-namespace EMSystem
-variable (𝓔 : EMSystem)
+variable (𝓔 : OpticalMedium) (ρ : ChargeDensity) (J : CurrentDensity)
 open SpaceTime
 
-/-- The permeability. -/
-noncomputable def μ₀ : ℝ := 1/(𝓔.c^2 * 𝓔.ε₀)
-
-/-- Coulomb's constant. -/
-noncomputable def coulombConstant : ℝ := 1/(4 * Real.pi * 𝓔.ε₀)
-
-end EMSystem
-
-variable (𝓔 : EMSystem) (ρ : ChargeDensity) (J : CurrentDensity)
-open SpaceTime
-
-local notation "ε₀" => 𝓔.ε₀
-local notation "μ₀" => 𝓔.μ₀
+local notation "ε" => 𝓔.ε
+local notation "μ" => 𝓔.μ
+open Time
 
 /-- Gauss's law for the Electric field. -/
 def GaussLawElectric (E : ElectricField) : Prop :=
-  ∀ x : SpaceTime, ε₀ * (∇⬝ E) x = ρ x
+  ∀ t : Time, ∀ x : Space, ε * (∇ ⬝ E t) x = ρ t x
 
 /-- Gauss's law for the Magnetic field. -/
 def GaussLawMagnetic (B : MagneticField) : Prop :=
-  ∀ x : SpaceTime, (∇⬝ B) x = 0
+  ∀ t : Time, ∀ x : Space, (∇ ⬝ B t) x = 0
 
 /-- Ampère's law. -/
 def AmpereLaw (E : ElectricField) (B : MagneticField) : Prop :=
-  ∀ x : SpaceTime, ∇× B x = μ₀ • (J x + ε₀ • ∂ₜ E x)
+  ∀ t : Time, ∀ x : Space, (∇ × B t) x = μ • (J t x + ε • ∂ₜ (fun t => E t x) t)
 
 /-- Faraday's law. -/
 def FaradayLaw (E : ElectricField) (B : MagneticField) : Prop :=
-  ∀ x : SpaceTime, ∇× E x = - ∂ₜ B x
+  ∀ t : Time, ∀ x : Space, (∇ × E t) x = - ∂ₜ (fun t => B t x) t
 
 /-- Maxwell's equations. -/
 def MaxwellEquations (E : ElectricField) (B : MagneticField) : Prop :=
   GaussLawElectric 𝓔 ρ E ∧ GaussLawMagnetic B ∧
-  FaradayLaw E B ∧ AmpereLaw 𝓔 J E B
+  AmpereLaw 𝓔 J E B ∧ FaradayLaw E B
 
 TODO "6V2VD" "Show that if the charge density is spherically symmetric,
   then the electric field is also spherically symmetric."

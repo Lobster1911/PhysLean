@@ -12,8 +12,6 @@ We define the ACC system for the Standard Model with right-handed neutrinos and 
 anomaly.
 -/
 
-universe v u
-
 namespace SMRHN
 open SMνCharges
 open SMνACCs
@@ -22,6 +20,7 @@ open BigOperators
 /-- The ACC system for the SM plus RHN with no gravitational anomaly. -/
 @[simps!]
 def SMNoGrav (n : ℕ) : ACCSystem where
+  toACCSystemCharges := SMνCharges n
   numberLinear := 2
   linearACCs := fun i =>
     match i with

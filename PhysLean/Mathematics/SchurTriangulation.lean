@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Gordon Hsu
 -/
 import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
-import Mathlib.LinearAlgebra.Matrix.Spectrum
+import Mathlib.Analysis.InnerProductSpace.Adjoint
 /-! # Schur triangulation
 
 Schur triangulation is more commonly known as Schur decomposition or Schur triangularization, but
@@ -142,7 +142,7 @@ protected noncomputable def SchurTriangulationAux.of
     let W : Submodule 𝕜 E := Vᗮ
     let m := Module.finrank 𝕜 V
     have hdim : m + Module.finrank 𝕜 W = Module.finrank 𝕜 E := V.finrank_add_finrank_orthogonal
-    let g : Module.End 𝕜 W := orthogonalProjection W ∘ₗ f.domRestrict W
+    let g : Module.End 𝕜 W := Submodule.orthogonalProjection W ∘ₗ f.domRestrict W
     let ⟨n, hn, bW, hg⟩ := SchurTriangulationAux.of g
 
     have bV : OrthonormalBasis (Fin m) 𝕜 V := stdOrthonormalBasis 𝕜 V
@@ -203,9 +203,9 @@ protected noncomputable def SchurTriangulationAux.of
           calc toMatrixOrthonormal basis f i j
             _ = ⟪(bW i' : E), f (bW j')⟫_𝕜 :=
               hf (Equiv.finAddEquivSigmaCond_false hi) (Equiv.finAddEquivSigmaCond_false hj)
-            _ = ⟪bW i', g (bW j')⟫_𝕜 := by simp only [coe_comp, ContinuousLinearMap.coe_coe,
-              Function.comp_apply, domRestrict_apply, inner_orthogonalProjection_eq_of_mem_left, g,
-              B, V, W]
+            _ = ⟪bW i', g (bW j')⟫_𝕜 := by
+              rw [coe_comp, ContinuousLinearMap.coe_coe, Function.comp_apply, domRestrict_apply,
+                Submodule.inner_orthogonalProjection_eq_of_mem_left]
             _ = toMatrixOrthonormal bW g i' j' := (g.toMatrixOrthonormal_apply_apply ..).symm
             _ = 0 := hg (Nat.sub_lt_sub_right (Nat.le_of_not_lt hj) hji)
     }
@@ -228,15 +228,12 @@ decreasing_by exact
 end LinearMap
 
 namespace Matrix
-/- IMPORTANT: existing `DecidableEq n` should take precedence over `LinearOrder.decidableEq`,
-a.k.a., `instDecidableEq_mathlib`. -/
+
 variable [RCLike 𝕜] [IsAlgClosed 𝕜] [Fintype n] [DecidableEq n] [LinearOrder n] (A : Matrix n n 𝕜)
 
-/-- **Don't use this definition directly.** Instead, use `Matrix.schurTriangulationBasis`,
-`Matrix.schurTriangulationUnitary`, and `Matrix.schurTriangulation` for which this is their
-simultaneous definition. This is `LinearMap.SchurTriangulationAux` adapted for matrices in the
+/-- This is `LinearMap.SchurTriangulationAux` adapted for matrices in the
 Euclidean space. -/
-noncomputable def schurTriangulationAux :
+private noncomputable def schurTriangulationAux :
     OrthonormalBasis n 𝕜 (EuclideanSpace 𝕜 n) × UpperTriangular n 𝕜 :=
   let f := toEuclideanLin A
   let ⟨d, hd, b, hut⟩ := LinearMap.SchurTriangulationAux.of f
